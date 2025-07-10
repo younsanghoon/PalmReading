@@ -5,7 +5,8 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { ResultChart } from "@/components/ui/result-chart";
 import { useImageUpload } from "@/hooks/use-image-upload";
 import { useTeachableMachine } from "@/hooks/use-teachable-machine";
-import { Camera, Upload, Share2, RotateCcw } from "lucide-react";
+import { Camera, Upload, Share2, RotateCcw, Users } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PalmReadingTestProps {
   open: boolean;
@@ -116,6 +117,15 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
         borderWidth: 1
       }]
     };
+  };
+
+  const getPalmCompatibility = () => {
+    const compatibility = {
+      best: ['곰상', '강아지상', 'ISFJ', 'ESFJ', '에겐남', '에겐녀'],
+      good: ['고양이상', '토끼상', 'INFP', 'ENFP', '테토남', '테토녀'],
+      description: '손금 분석에 따르면 균형잡힌 성격으로 많은 유형과 좋은 관계를 형성할 수 있습니다. 특히 안정적이고 신뢰할 수 있는 상대와 깊은 유대를 형성하며, 감정적으로 성숙한 관계를 선호합니다.'
+    };
+    return compatibility;
   };
 
   return (
@@ -256,6 +266,52 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
                 />
               </div>
             )}
+
+            {/* 궁합 분석 */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  궁합 분석
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {(() => {
+                  const compatibility = getPalmCompatibility();
+                  return (
+                    <div className="space-y-4">
+                      <p className="text-gray-700 dark:text-gray-300">
+                        {compatibility.description}
+                      </p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="font-semibold text-green-600 mb-2">최고 궁합</h4>
+                          <div className="space-y-1">
+                            {compatibility.best.map((type, index) => (
+                              <span key={index} className="block px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded text-sm">
+                                {type}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-semibold text-blue-600 mb-2">좋은 궁합</h4>
+                          <div className="space-y-1">
+                            {compatibility.good.map((type, index) => (
+                              <span key={index} className="block px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-sm">
+                                {type}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
 
             <div className="flex justify-center space-x-4">
               <Button

@@ -38,10 +38,10 @@ export default function EnneagramTestPage() {
             <div className="flex-1 space-y-8">
               <div className="text-center">
                 <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                  에네아그램 성격 테스트
+                  에겐-테토 성격 테스트
                 </h1>
                 <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-                  9가지 성격 유형 중 나의 핵심 동기를 발견하세요
+                  주도적(에겐) vs 수용적(테토) 성향을 발견하세요
                 </p>
               </div>
 
@@ -54,10 +54,10 @@ export default function EnneagramTestPage() {
               <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
                 <h2 className="text-2xl font-semibold mb-4">테스트 안내</h2>
                 <div className="space-y-4 text-gray-600 dark:text-gray-300">
-                  <p>• 총 40개의 질문으로 구성된 정밀한 에네아그램 테스트</p>
-                  <p>• 9가지 성격 유형별 핵심 동기와 행동 패턴 분석</p>
-                  <p>• 개인의 성장 방향과 스트레스 반응 패턴 제시</p>
-                  <p>• 에겐형(주도적) vs 테토형(수용적) 성향 분석</p>
+                  <p>• 총 25개의 랜덤 질문으로 구성된 정밀한 에겐-테토 테스트</p>
+                  <p>• 주도적(에겐) vs 수용적(테토) 성향 분석</p>
+                  <p>• 성별에 따른 세분화된 결과 제공</p>
+                  <p>• 다른 성격 유형과의 궁합 분석 포함</p>
                   <p>• 개인정보는 저장되지 않으며, 테스트 결과만 표시됩니다</p>
                 </div>
               </div>

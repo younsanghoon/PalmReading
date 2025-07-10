@@ -6,7 +6,8 @@ import { ResultChart } from "@/components/ui/result-chart";
 import { useImageUpload } from "@/hooks/use-image-upload";
 import { useTeachableMachine } from "@/hooks/use-teachable-machine";
 import { ANIMAL_PERSONALITIES } from "@/lib/personality-data";
-import { Camera, Upload, Share2, RotateCcw } from "lucide-react";
+import { Camera, Upload, Share2, RotateCcw, Users } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface AnimalFaceTestProps {
   open: boolean;
@@ -118,6 +119,47 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
         ],
         borderWidth: 1
       }]
+    };
+  };
+
+  const getAnimalCompatibility = (animalType: string) => {
+    const compatibilityData: Record<string, { best: string[], good: string[], description: string }> = {
+      '강아지상': {
+        best: ['고양이상', '곰상', 'ESFJ', 'ISFJ', '에겐남', '에겐녀'],
+        good: ['토끼상', '여우상', 'ENFP', 'ESFP', '테토남', '테토녀'],
+        description: '강아지상은 충성스럽고 친근한 성격으로 안정적이고 따뜻한 상대와 잘 어울립니다.'
+      },
+      '고양이상': {
+        best: ['강아지상', '여우상', 'INFJ', 'INTJ', '테토남', '테토녀'],
+        good: ['곰상', '원숭이상', 'ISFP', 'INFP', '에겐남', '에겐녀'],
+        description: '고양이상은 독립적이고 신비로운 매력으로 이해심 깊은 상대와 깊은 유대를 형성합니다.'
+      },
+      '곰상': {
+        best: ['토끼상', '강아지상', 'ISFJ', 'ESFJ', '테토남', '테토녀'],
+        good: ['고양이상', '여우상', 'INFP', 'ENFP', '에겐남', '에겐녀'],
+        description: '곰상은 든든하고 포용력 있는 성격으로 순수하고 따뜻한 마음과 조화를 이룹니다.'
+      },
+      '여우상': {
+        best: ['원숭이상', '고양이상', 'ENTP', 'ENFJ', '에겐남', '에겐녀'],
+        good: ['강아지상', '곰상', 'INTJ', 'INFJ', '테토남', '테토녀'],
+        description: '여우상은 영리하고 매혹적인 매력으로 창의적이고 지적인 상대와 흥미로운 관계를 만듭니다.'
+      },
+      '원숭이상': {
+        best: ['여우상', '토끼상', 'ENFP', 'ESFP', '에겐남', '에겐녀'],
+        good: ['강아지상', '고양이상', 'ENTP', 'ESTP', '테토남', '테토녀'],
+        description: '원숭이상은 재미있고 창의적인 성격으로 활발하고 유머러스한 상대와 즐거운 시간을 보냅니다.'
+      },
+      '토끼상': {
+        best: ['곰상', '원숭이상', 'ISFP', 'INFP', '테토남', '테토녀'],
+        good: ['강아지상', '고양이상', 'ISFJ', 'ESFJ', '에겐남', '에겐녀'],
+        description: '토끼상은 온순하고 섬세한 성격으로 보호받을 수 있는 안전한 관계를 선호합니다.'
+      }
+    };
+
+    return compatibilityData[animalType] || {
+      best: ['모든 동물상'],
+      good: ['모든 동물상'],
+      description: '모든 동물상과 좋은 관계를 형성할 수 있습니다.'
     };
   };
 
@@ -251,6 +293,52 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                 />
               </div>
             )}
+
+            {/* 궁합 분석 */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  궁합 분석
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {(() => {
+                  const compatibility = getAnimalCompatibility(result.animalType);
+                  return (
+                    <div className="space-y-4">
+                      <p className="text-gray-700 dark:text-gray-300">
+                        {compatibility.description}
+                      </p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="font-semibold text-green-600 mb-2">최고 궁합</h4>
+                          <div className="space-y-1">
+                            {compatibility.best.map((type, index) => (
+                              <span key={index} className="block px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded text-sm">
+                                {type}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-semibold text-blue-600 mb-2">좋은 궁합</h4>
+                          <div className="space-y-1">
+                            {compatibility.good.map((type, index) => (
+                              <span key={index} className="block px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-sm">
+                                {type}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
 
             <div className="flex justify-center space-x-4">
               <Button

@@ -20,6 +20,7 @@ function Router() {
       <Route path="/animal-test" component={AnimalTestPage} />
       <Route path="/mbti-test" component={MBTITestPage} />
       <Route path="/enneagram-test" component={EnneagramTestPage} />
+      <Route path="/egen-teto-test" component={EnneagramTestPage} />
       <Route path="/palm-test" component={PalmTestPage} />
       <Route path="/privacy-policy" component={PrivacyPolicyPage} />
       <Route path="/terms-of-service" component={TermsOfServicePage} />

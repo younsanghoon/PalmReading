@@ -26,11 +26,11 @@ export default function Home() {
     },
     {
       id: 'enneagram' as const,
-      title: "에네아그램 테스트",
-      description: "9가지 성격 유형으로 나의 핵심 동기를 발견하세요",
+      title: "에겐-테토 테스트",
+      description: "주도적 vs 수용적 성향으로 나의 행동 패턴을 발견하세요",
       icon: <Eye className="w-6 h-6" />,
-      duration: "8-12분",
-      tags: ["핵심 동기", "성장", "자기 인식"],
+      duration: "5-7분",
+      tags: ["행동 패턴", "성향 분석", "궁합"],
       href: "/enneagram-test"
     },
     {
@@ -64,14 +64,15 @@ export default function Home() {
 
             {/* Content Area */}
             <div className="flex-1">
-              <div className="text-center mb-12">
-                <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              <div className="text-center mb-12 animate-fade-in">
+                <h1 className="text-5xl font-bold gradient-text mb-6">
                   성격 분석 테스트
                 </h1>
-                <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
                   AI와 심리학이 만나 더 정확한 성격 분석을 제공합니다.
                   나를 더 잘 이해하고 성장할 수 있는 인사이트를 얻어보세요.
                 </p>
+                <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full mt-6"></div>
               </div>
 
               {/* Mobile Ad */}
@@ -89,7 +90,7 @@ export default function Home() {
                       duration={test.duration}
                       tags={test.tags}
                       onClick={() => {}}
-                      className="cursor-pointer hover:scale-105 transition-transform"
+                      className="cursor-pointer test-card animate-slide-up"
                     />
                   </Link>
                 ))}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { ResultChart } from "@/components/ui/result-chart";
 import { MBTI_QUESTIONS, calculateMBTI, MBTI_TYPES } from "@/lib/personality-data";
-import { ChevronLeft, ChevronRight, Share2, RotateCcw } from "lucide-react";
+import { ChevronLeft, ChevronRight, Share2, RotateCcw, Users } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface MBTITestProps {
   open: boolean;
@@ -20,6 +21,16 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
   const [result, setResult] = useState<any>(null);
   const [showResult, setShowResult] = useState(false);
 
+  // 질문 순서와 옵션 순서 랜덤화
+  const randomizedQuestions = useMemo(() => {
+    return [...MBTI_QUESTIONS]
+      .sort(() => Math.random() - 0.5)
+      .map(q => ({
+        ...q,
+        options: [...q.options].sort(() => Math.random() - 0.5)
+      }));
+  }, [open]);
+
   const handleAnswerChange = (value: string) => {
     setCurrentAnswer(value);
   };
@@ -31,7 +42,7 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
     newAnswers[currentQuestion] = currentAnswer;
     setAnswers(newAnswers);
 
-    if (currentQuestion < MBTI_QUESTIONS.length - 1) {
+    if (currentQuestion < randomizedQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setCurrentAnswer(newAnswers[currentQuestion + 1] || '');
     } else {
@@ -112,7 +123,98 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
     };
   };
 
-  const currentQ = MBTI_QUESTIONS[currentQuestion];
+  const getMBTICompatibility = (userType: string) => {
+    const compatibilityData: Record<string, { best: string[], good: string[], description: string }> = {
+      'INTJ': {
+        best: ['ENFP', 'ENTP', 'INFP', 'ISFP'],
+        good: ['ENTJ', 'INFJ', 'ISFJ', 'ISTJ'],
+        description: 'INTJ는 창의적이고 열정적인 성격과 잘 어울리며, 서로의 다른 관점을 존중합니다.'
+      },
+      'INTP': {
+        best: ['ENFJ', 'ENTJ', 'INFJ', 'INTJ'],
+        good: ['ENTP', 'INFP', 'ISFP', 'ISTP'],
+        description: 'INTP는 직관적이고 이해심 많은 파트너와 깊은 연결을 형성합니다.'
+      },
+      'ENTJ': {
+        best: ['INFP', 'INTP', 'ENFP', 'ENTP'],
+        good: ['INTJ', 'ISFP', 'ESFP', 'ESTJ'],
+        description: 'ENTJ는 창의적이고 독립적인 성격과 균형을 이루며 성장합니다.'
+      },
+      'ENTP': {
+        best: ['INFJ', 'INTJ', 'ENFJ', 'ENTJ'],
+        good: ['ENFP', 'INTP', 'ISFJ', 'ESFJ'],
+        description: 'ENTP는 직관적이고 체계적인 파트너와 아이디어를 발전시킵니다.'
+      },
+      'INFJ': {
+        best: ['ENFP', 'ENTP', 'INFP', 'ENFJ'],
+        good: ['INTJ', 'ISFP', 'ESFP', 'ISFJ'],
+        description: 'INFJ는 따뜻하고 이해심 많은 성격과 깊은 유대를 형성합니다.'
+      },
+      'INFP': {
+        best: ['ENFJ', 'ENTJ', 'ENFP', 'ESFJ'],
+        good: ['INFJ', 'ISFJ', 'ESFP', 'ISFP'],
+        description: 'INFP는 격려해주고 이해해주는 파트너와 진정한 자아를 발견합니다.'
+      },
+      'ENFJ': {
+        best: ['INFP', 'ISFP', 'INTP', 'INFJ'],
+        good: ['ENFP', 'ESFP', 'ISFJ', 'ESFJ'],
+        description: 'ENFJ는 진실하고 깊이 있는 성격과 의미 있는 관계를 만듭니다.'
+      },
+      'ENFP': {
+        best: ['INTJ', 'INFJ', 'ISFJ', 'ISTJ'],
+        good: ['ENFJ', 'ESFJ', 'INFP', 'ISFP'],
+        description: 'ENFP는 안정적이고 신뢰할 수 있는 파트너와 조화를 이룹니다.'
+      },
+      'ISTJ': {
+        best: ['ESFP', 'ESTP', 'ENFP', 'ESFJ'],
+        good: ['ISFJ', 'ESTJ', 'ISFP', 'ISTP'],
+        description: 'ISTJ는 활발하고 사교적인 성격과 균형을 이루며 새로운 경험을 합니다.'
+      },
+      'ISFJ': {
+        best: ['ESFP', 'ESTP', 'ENFP', 'ESFJ'],
+        good: ['ISTJ', 'ISFP', 'INFJ', 'INFP'],
+        description: 'ISFJ는 따뜻하고 감사할 줄 아는 파트너와 안정적인 관계를 유지합니다.'
+      },
+      'ESTJ': {
+        best: ['ISFP', 'ISTP', 'INTP', 'INFP'],
+        good: ['ESFJ', 'ISTJ', 'ESTP', 'ESFP'],
+        description: 'ESTJ는 유연하고 적응적인 성격과 서로 보완하며 성장합니다.'
+      },
+      'ESFJ': {
+        best: ['ISFP', 'ISTP', 'INFP', 'INTP'],
+        good: ['ESFP', 'ISFJ', 'ESTJ', 'ENFJ'],
+        description: 'ESFJ는 독립적이고 창의적인 파트너와 다양한 관점을 나눕니다.'
+      },
+      'ISTP': {
+        best: ['ESFJ', 'ESTJ', 'ENFJ', 'ESFP'],
+        good: ['ISFP', 'ESTP', 'INFP', 'ENTP'],
+        description: 'ISTP는 사교적이고 표현력 풍부한 성격과 감정적 연결을 형성합니다.'
+      },
+      'ISFP': {
+        best: ['ESFJ', 'ESTJ', 'ENFJ', 'ENTJ'],
+        good: ['ISFJ', 'INFJ', 'ESFP', 'INFP'],
+        description: 'ISFP는 격려해주고 이끌어주는 파트너와 자신감을 키웁니다.'
+      },
+      'ESTP': {
+        best: ['ISFJ', 'ISTJ', 'INFJ', 'INTJ'],
+        good: ['ESFP', 'ISTP', 'ENFP', 'ENTP'],
+        description: 'ESTP는 안정적이고 계획적인 성격과 균형을 이루며 발전합니다.'
+      },
+      'ESFP': {
+        best: ['ISFJ', 'ISTJ', 'INFJ', 'INTJ'],
+        good: ['ESFJ', 'ESTP', 'ENFP', 'ISFP'],
+        description: 'ESFP는 차분하고 신중한 파트너와 안정감을 찾습니다.'
+      }
+    };
+
+    return compatibilityData[userType] || {
+      best: ['모든 유형'],
+      good: ['모든 유형'],
+      description: '모든 MBTI 유형과 좋은 관계를 형성할 수 있습니다.'
+    };
+  };
+
+  const currentQ = randomizedQuestions[currentQuestion];
   const mbtiInfo = result ? MBTI_TYPES[result.type as keyof typeof MBTI_TYPES] : null;
 
   return (
@@ -127,16 +229,17 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
         {!showResult ? (
           <div className="space-y-8">
             <ProgressBar 
-              value={currentQuestion} 
-              max={MBTI_QUESTIONS.length}
+              value={((currentQuestion + 1) / randomizedQuestions.length) * 100}
               className="mb-6"
             />
 
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  질문 {currentQuestion + 1}
-                </h3>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">
+                    질문 {currentQuestion + 1} / {randomizedQuestions.length}
+                  </h3>
+                </div>
                 <p className="text-lg text-gray-700 mb-6">
                   {currentQ.question}
                 </p>
@@ -173,7 +276,7 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
                 disabled={!currentAnswer}
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                {currentQuestion === MBTI_QUESTIONS.length - 1 ? '결과 보기' : '다음'}
+                {currentQuestion === randomizedQuestions.length - 1 ? '결과 보기' : '다음'}
                 <ChevronRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
@@ -220,6 +323,52 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
                 />
               </div>
             )}
+
+            {/* 궁합 분석 */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  궁합 분석
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {(() => {
+                  const compatibility = getMBTICompatibility(result.type);
+                  return (
+                    <div className="space-y-4">
+                      <p className="text-gray-700 dark:text-gray-300">
+                        {compatibility.description}
+                      </p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="font-semibold text-green-600 mb-2">최고 궁합</h4>
+                          <div className="space-y-1">
+                            {compatibility.best.map((type, index) => (
+                              <span key={index} className="block px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded text-sm">
+                                {type}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-semibold text-blue-600 mb-2">좋은 궁합</h4>
+                          <div className="space-y-1">
+                            {compatibility.good.map((type, index) => (
+                              <span key={index} className="block px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-sm">
+                                {type}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
 
             <div className="flex justify-center space-x-4">
               <Button
