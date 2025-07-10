@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { predictAnimalFace, predictPalmReading, ModelPrediction } from '../lib/ai-models';
 
 interface UseTeachableMachineReturn {
