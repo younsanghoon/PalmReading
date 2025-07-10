@@ -34,20 +34,27 @@ Preferred communication style: Simple, everyday language.
 
 ### Personality Tests
 1. **Animal Face Test**: Uses camera/uploaded images with TensorFlow.js for facial feature analysis
-2. **MBTI Test**: Traditional questionnaire-based personality assessment
-3. **Enneagram Test**: Simplified personality type evaluation
-4. **Palm Reading Test**: AI-powered palm analysis for entertainment purposes
+2. **MBTI Test**: 40-question comprehensive personality assessment covering E/I, S/N, T/F, J/P dimensions
+3. **Enneagram Test**: 40-question assessment for Egen(주도적) vs Teto(수용적) personality types
+4. **Palm Reading Test**: AI-powered palm analysis using 5 different models (능력선, 감정선, 생명선, 운명선, 지능선)
 
 ### UI Components
 - **Dialog System**: Modal interfaces for test administration
 - **Progress Tracking**: Visual progress indicators for multi-step tests
 - **Result Visualization**: Charts and graphs for displaying personality insights
 - **Image Upload**: Drag-and-drop and file selection for image-based tests
+- **Ad Spaces**: Strategic advertisement placement (banner, rectangle, skyscraper, mobile formats)
+- **Routing System**: Separate pages for each test type with dedicated URLs
 
 ### Custom Hooks
 - **useImageUpload**: Handles image file processing and validation
 - **useTeachableMachine**: Manages AI model loading and prediction
 - **useMobile**: Responsive design detection
+
+### Navigation Structure
+- **Home Page** (/): Main landing page with test overview and links
+- **Test Pages**: Dedicated pages for each test (/animal-test, /mbti-test, /enneagram-test, /palm-test)
+- **Legal Pages**: Privacy policy, terms of service, contact information
 
 ## Data Flow
 
@@ -94,5 +101,25 @@ Preferred communication style: Simple, everyday language.
 3. **Component-based UI**: Modular design allows for easy test addition and maintenance
 4. **Type Safety**: TypeScript throughout for better developer experience and fewer runtime errors
 5. **Responsive Design**: Mobile-first approach with progressive enhancement
+6. **URL Encryption**: Security layer for AI model URLs using base64 encoding with character substitution
+7. **No Data Storage**: Strict privacy policy - no personal information or test results are stored on servers
+8. **Monetization Strategy**: Strategic ad placement for revenue generation through multiple ad networks
 
-The application is designed to be maintainable, scalable, and user-friendly while providing engaging personality insights through both traditional and innovative assessment methods.
+## Recent Changes (July 10, 2024)
+
+### Major Updates
+- **Expanded Question Sets**: MBTI and Enneagram tests now feature 40 questions each for more accurate results
+- **Page Structure Overhaul**: Converted from modal-based to dedicated page-based navigation
+- **Advertisement Integration**: Added comprehensive ad space system supporting multiple formats
+- **Legal Framework**: Implemented privacy policy, terms of service, and contact pages
+- **Enhanced Security**: Updated palm reading model URLs with proper encryption
+- **Improved User Experience**: Better navigation flow and responsive design across all devices
+
+### Technical Improvements
+- **Model URL Security**: Encrypted URLs for all 5 palm reading models (ability, emotion, life, fate, intelligence lines)
+- **Routing Enhancement**: Full page routing system with dedicated URLs for each test
+- **Ad Space Component**: Flexible advertisement component supporting banner, rectangle, skyscraper, and mobile formats
+- **Footer Integration**: Added footer with legal links and branding
+- **Mobile Optimization**: Enhanced mobile experience with appropriate ad placements
+
+The application is designed to be maintainable, scalable, and user-friendly while providing engaging personality insights through both traditional and innovative assessment methods, with a strong focus on privacy and user data protection.
