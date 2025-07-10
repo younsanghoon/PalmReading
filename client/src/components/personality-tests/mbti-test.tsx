@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
+import * as React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -6,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { ResultChart } from "@/components/ui/result-chart";
 import { getRandomMBTIQuestions, calculateMBTI, MBTI_TYPES } from "@/lib/personality-data";
+import { Question } from "@/types/personality";
 import { ChevronLeft, ChevronRight, Share2, RotateCcw, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -20,15 +22,29 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [result, setResult] = useState<any>(null);
   const [showResult, setShowResult] = useState(false);
+  const [randomizedQuestions, setRandomizedQuestions] = useState<Question[]>([]);
 
-  // 160개 질문에서 랜덤 40개 선택하고 옵션 순서 랜덤화
-  const [randomizedQuestions, setRandomizedQuestions] = useState(() => {
+  // 테스트 시작/재시작 시 질문 랜덤화 함수
+  const generateRandomQuestions = () => {
     const questions = getRandomMBTIQuestions();
     return questions.map(q => ({
       ...q,
       options: [...q.options].sort(() => Math.random() - 0.5)
     }));
-  });
+  };
+
+  // 컴포넌트 초기화 또는 다이얼로그가 열릴 때 질문 생성
+  React.useEffect(() => {
+    if (open) {
+      // 다이얼로그가 열릴 때마다 완전히 새로운 질문 세트 생성
+      setCurrentQuestion(0);
+      setAnswers([]);
+      setCurrentAnswer('');
+      setResult(null);
+      setShowResult(false);
+      setRandomizedQuestions(generateRandomQuestions());
+    }
+  }, [open]);
 
   const handleAnswerChange = (value: string) => {
     setCurrentAnswer(value);
@@ -74,13 +90,8 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
     setCurrentAnswer('');
     setResult(null);
     setShowResult(false);
-    // 160개 질문에서 새로운 랜덤 40개 선택
-    const questions = getRandomMBTIQuestions();
-    const newRandomizedQuestions = questions.map(q => ({
-      ...q,
-      options: [...q.options].sort(() => Math.random() - 0.5)
-    }));
-    setRandomizedQuestions(newRandomizedQuestions);
+    // 완전히 새로운 랜덤 질문 세트 생성
+    setRandomizedQuestions(generateRandomQuestions());
   };
 
   const handleShare = async () => {
