@@ -5,7 +5,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { ResultChart } from "@/components/ui/result-chart";
-import { ENNEAGRAM_QUESTIONS, calculateEnneagram } from "@/lib/personality-data";
+import { getRandomEnneagramQuestions, calculateEnneagram } from "@/lib/personality-data";
 import { ChevronLeft, ChevronRight, Share2, RotateCcw, User, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -25,11 +25,10 @@ export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
   const [gender, setGender] = useState<Gender>(null);
   const [genderSelected, setGenderSelected] = useState(false);
 
-  // 25개 랜덤 질문 선택 및 순서 섞기
+  // 100개 질문에서 랜덤 25개 선택 및 순서 섞기
   const [randomizedQuestions, setRandomizedQuestions] = useState(() => {
-    const shuffledQuestions = [...ENNEAGRAM_QUESTIONS].sort(() => Math.random() - 0.5);
-    const selected25Questions = shuffledQuestions.slice(0, 25);
-    return selected25Questions.map(q => ({
+    const questions = getRandomEnneagramQuestions();
+    return questions.map(q => ({
       ...q,
       options: [...q.options].sort(() => Math.random() - 0.5) // 옵션 순서도 랜덤화
     }));
@@ -103,10 +102,9 @@ export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
     setShowResult(false);
     setGender(null);
     setGenderSelected(false);
-    // 질문 다시 랜덤화
-    const shuffledQuestions = [...ENNEAGRAM_QUESTIONS].sort(() => Math.random() - 0.5);
-    const selected25Questions = shuffledQuestions.slice(0, 25);
-    const newRandomizedQuestions = selected25Questions.map(q => ({
+    // 100개 질문에서 새로운 랜덤 25개 선택
+    const questions = getRandomEnneagramQuestions();
+    const newRandomizedQuestions = questions.map(q => ({
       ...q,
       options: [...q.options].sort(() => Math.random() - 0.5)
     }));

@@ -5,7 +5,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { ResultChart } from "@/components/ui/result-chart";
-import { MBTI_QUESTIONS, calculateMBTI, MBTI_TYPES } from "@/lib/personality-data";
+import { getRandomMBTIQuestions, calculateMBTI, MBTI_TYPES } from "@/lib/personality-data";
 import { ChevronLeft, ChevronRight, Share2, RotateCcw, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -21,15 +21,14 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
   const [result, setResult] = useState<any>(null);
   const [showResult, setShowResult] = useState(false);
 
-  // 질문 순서와 옵션 순서 랜덤화
-  const randomizedQuestions = useMemo(() => {
-    return [...MBTI_QUESTIONS]
-      .sort(() => Math.random() - 0.5)
-      .map(q => ({
-        ...q,
-        options: [...q.options].sort(() => Math.random() - 0.5)
-      }));
-  }, [open]);
+  // 160개 질문에서 랜덤 40개 선택하고 옵션 순서 랜덤화
+  const [randomizedQuestions, setRandomizedQuestions] = useState(() => {
+    const questions = getRandomMBTIQuestions();
+    return questions.map(q => ({
+      ...q,
+      options: [...q.options].sort(() => Math.random() - 0.5)
+    }));
+  });
 
   const handleAnswerChange = (value: string) => {
     setCurrentAnswer(value);
@@ -75,13 +74,13 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
     setCurrentAnswer('');
     setResult(null);
     setShowResult(false);
-    // 질문 다시 랜덤화
-    const shuffled = [...MBTI_QUESTIONS].sort(() => Math.random() - 0.5);
-    const shuffledWithOptions = shuffled.map(q => ({
+    // 160개 질문에서 새로운 랜덤 40개 선택
+    const questions = getRandomMBTIQuestions();
+    const newRandomizedQuestions = questions.map(q => ({
       ...q,
       options: [...q.options].sort(() => Math.random() - 0.5)
     }));
-    setRandomizedQuestions(shuffledWithOptions);
+    setRandomizedQuestions(newRandomizedQuestions);
   };
 
   const handleShare = async () => {

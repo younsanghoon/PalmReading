@@ -107,7 +107,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (July 10, 2025)
 
-### Major Updates
+### Major Updates (Latest)
+- **Expanded Question Pools**: Massively expanded question databases for better test variety
+  - MBTI: Expanded to 160 total questions (40 per dimension: E/I, S/N, T/F, J/P)
+  - 에겐-테토: Expanded to 100 total questions (balanced between personality types)
+- **Improved Random Sampling**: Enhanced randomization system for test quality
+  - MBTI: Random selection of 40 questions from 160-question pool per test session
+  - 에겐-테토: Random selection of 25 questions from 100-question pool per test session
+- **Separate Question Management**: Created dedicated question files for better organization
+  - `/lib/mbti-questions.ts`: Contains all 160 MBTI questions
+  - `/lib/enneagram-questions.ts`: Contains all 100 에겐-테토 questions
+- **Enhanced Test Restart**: Improved reset functionality with fresh question selection
+
+### Previous Updates
 - **Compatibility/Matching Features**: Added comprehensive compatibility analysis for all tests (MBTI, 에겐-테토, animal face, palm reading)
 - **Enhanced Visual Design**: Implemented modern gradient backgrounds, improved card animations, and enhanced overall styling
 - **Question Randomization**: Fixed MBTI test to properly use randomized questions instead of original question order
@@ -115,6 +127,10 @@ Preferred communication style: Simple, everyday language.
 - **Improved User Experience**: Better visual feedback, animations, and responsive design improvements
 
 ### Technical Improvements  
+- **Question Pool Architecture**: Implemented scalable question management system with random sampling functions
+- **MBTI Question Distribution**: Balanced 160 questions across four personality dimensions (40 each)
+- **에겐-테토 Question Balance**: Distributed 100 questions evenly between personality types
+- **Random Selection Functions**: Added `getRandomMBTIQuestions()` and `getRandomEnneagramQuestions()` utilities
 - **MBTI Compatibility System**: 16-type comprehensive compatibility matrix with detailed descriptions
 - **Animal Face Compatibility**: Cross-referenced compatibility with MBTI types and 에겐-테토 results
 - **Palm Reading Integration**: Added compatibility analysis based on palm reading characteristics

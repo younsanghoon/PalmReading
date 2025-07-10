@@ -1,7 +1,22 @@
 import { Question, MBTIResult, EnneagramResult, AnimalFaceResult, PalmReadingResult } from '../types/personality';
+import { MBTI_QUESTIONS as ALL_MBTI_QUESTIONS } from './mbti-questions';
+import { ENNEAGRAM_QUESTIONS as ALL_ENNEAGRAM_QUESTIONS } from './enneagram-questions';
 
+// MBTI 160개 질문에서 랜덤 40개 선택
+export function getRandomMBTIQuestions(): Question[] {
+  const shuffled = [...ALL_MBTI_QUESTIONS].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, 40);
+}
+
+// 에겐-테토 100개 질문에서 랜덤 25개 선택  
+export function getRandomEnneagramQuestions(): Question[] {
+  const shuffled = [...ALL_ENNEAGRAM_QUESTIONS].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, 25);
+}
+
+// 기존 호환성을 위해 MBTI_QUESTIONS 유지 (사용하지 않음)
 export const MBTI_QUESTIONS: Question[] = [
-  // E vs I 질문들 (10개)
+  // E vs I 질문들 (40개)
   {
     id: '1',
     question: '새로운 사람들과 만날 때 나는',
@@ -330,6 +345,7 @@ export const MBTI_QUESTIONS: Question[] = [
   }
 ];
 
+// 기존 호환성을 위해 ENNEAGRAM_QUESTIONS 유지 (사용하지 않음)
 export const ENNEAGRAM_QUESTIONS: Question[] = [
   // 에겐(주도적) vs 테토(수용적) 질문들 40개
   {
