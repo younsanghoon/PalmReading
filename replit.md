@@ -107,17 +107,22 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (July 10, 2025)
 
-### Major Updates (Latest)
-- **Expanded Question Pools**: Massively expanded question databases for better test variety
-  - MBTI: Expanded to 160 total questions (40 per dimension: E/I, S/N, T/F, J/P)
-  - 에겐-테토: Expanded to 100 total questions (balanced between personality types)
-- **Improved Random Sampling**: Enhanced randomization system for test quality
-  - MBTI: Random selection of 40 questions from 160-question pool per test session
-  - 에겐-테토: Random selection of 25 questions from 100-question pool per test session
-- **Separate Question Management**: Created dedicated question files for better organization
-  - `/lib/mbti-questions.ts`: Contains all 160 MBTI questions
-  - `/lib/enneagram-questions.ts`: Contains all 100 에겐-테토 questions
-- **Enhanced Test Restart**: Improved reset functionality with fresh question selection
+### Major Updates (Latest - July 10, 2025)
+- **Complete Randomization System**: Implemented full randomization for enhanced test variety
+  - Question order randomization on every test start/restart
+  - Answer option order randomization for each question
+  - Fresh question selection from expanded pools (MBTI: 40/160, 에겐-테토: 25/100)
+- **Error Resolution & Stability**: Fixed critical runtime errors for smooth user experience
+  - Resolved MBTI test `currentQ` undefined error with loading states
+  - Added safety checks and optional chaining for robust error handling
+  - Implemented graceful loading messages during question preparation
+- **Animal Face Analysis Consistency**: Enhanced AI prediction reliability
+  - Image hash-based seed generation for consistent results on same photos
+  - Eliminated random variation in favor of deterministic, repeatable analysis
+  - Maintained privacy while ensuring accuracy across multiple attempts
+- **Enhanced Question Management**: Scalable architecture for future expansion
+  - Separate question files for better organization and maintenance
+  - Random sampling functions with balanced distribution across personality dimensions
 
 ### Previous Updates
 - **Compatibility/Matching Features**: Added comprehensive compatibility analysis for all tests (MBTI, 에겐-테토, animal face, palm reading)
