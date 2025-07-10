@@ -240,6 +240,24 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
   const currentQ = randomizedQuestions[currentQuestion];
   const mbtiInfo = result ? MBTI_TYPES[result.type as keyof typeof MBTI_TYPES] : null;
 
+  // 질문이 로드되지 않았을 때 로딩 표시
+  if (randomizedQuestions.length === 0) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-gray-900">
+              MBTI 성격 테스트
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-center h-32">
+            <div className="text-lg text-gray-600">질문을 준비하고 있습니다...</div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -264,13 +282,13 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
                   </h3>
                 </div>
                 <p className="text-lg text-gray-700 mb-6">
-                  {currentQ.question}
+                  {currentQ?.question || '질문을 로드하는 중...'}
                 </p>
               </div>
 
               <RadioGroup value={currentAnswer} onValueChange={handleAnswerChange}>
                 <div className="space-y-3">
-                  {currentQ.options.map((option, index) => (
+                  {currentQ?.options?.map((option, index) => (
                     <div key={index} className="flex items-center space-x-2 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                       <RadioGroupItem value={option.value} id={`option-${index}`} />
                       <Label 

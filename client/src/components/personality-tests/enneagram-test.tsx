@@ -167,6 +167,24 @@ export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
 
   if (!open) return null;
 
+  // 질문이 로드되지 않았을 때 로딩 표시
+  if (genderSelected && randomizedQuestions.length === 0) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-center bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              에겐-테토 성격 테스트
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-center h-32">
+            <div className="text-lg text-gray-600">질문을 준비하고 있습니다...</div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
