@@ -9,6 +9,7 @@ import { getRandomEnneagramQuestions, calculateEnneagram } from "@/lib/personali
 import { Question } from "@/types/personality";
 import { ChevronLeft, ChevronRight, Share2, RotateCcw, User, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLanguage } from "@/lib/i18n";
 
 interface EnneagramTestProps {
   open: boolean;
@@ -18,6 +19,7 @@ interface EnneagramTestProps {
 type Gender = 'male' | 'female' | null;
 
 export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
+  const { t } = useLanguage();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [currentAnswer, setCurrentAnswer] = useState('');
@@ -178,7 +180,7 @@ export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
             </DialogTitle>
           </DialogHeader>
           <div className="flex items-center justify-center h-32">
-            <div className="text-lg text-gray-600">질문을 준비하고 있습니다...</div>
+            <div className="text-lg text-gray-600">{t.preparingQuestions}</div>
           </div>
         </DialogContent>
       </Dialog>
@@ -190,7 +192,7 @@ export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            에겐-테토 성격 테스트
+            {t.enneagramTitle}
           </DialogTitle>
         </DialogHeader>
         
@@ -199,9 +201,9 @@ export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
             // 성별 선택 화면
             <div className="text-center space-y-6">
               <div>
-                <h3 className="text-xl font-semibold mb-2">성별을 선택해주세요</h3>
+                <h3 className="text-xl font-semibold mb-2">{t.selectGender}</h3>
                 <p className="text-gray-600 dark:text-gray-300">
-                  더 정확한 결과를 위해 성별을 선택해주세요
+                  {t.genderSelectDesc}
                 </p>
               </div>
               
@@ -212,7 +214,7 @@ export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
                 >
                   <CardContent className="p-6 text-center">
                     <User className="w-12 h-12 mx-auto mb-3 text-blue-500" />
-                    <h4 className="font-semibold">남성</h4>
+                    <h4 className="font-semibold">{t.male}</h4>
                   </CardContent>
                 </Card>
                 
@@ -222,7 +224,7 @@ export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
                 >
                   <CardContent className="p-6 text-center">
                     <User className="w-12 h-12 mx-auto mb-3 text-pink-500" />
-                    <h4 className="font-semibold">여성</h4>
+                    <h4 className="font-semibold">{t.female}</h4>
                   </CardContent>
                 </Card>
               </div>
@@ -232,10 +234,10 @@ export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">
-                  질문 {currentQuestion + 1} / {randomizedQuestions.length}
+                  {t.question} {currentQuestion + 1} {t.of} {randomizedQuestions.length}
                 </span>
                 <span className="text-sm text-gray-500">
-                  {gender === 'male' ? '남성' : '여성'} 모드
+                  {gender === 'male' ? t.male : t.female}
                 </span>
               </div>
               
@@ -274,7 +276,7 @@ export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
                   className="flex items-center gap-2"
                 >
                   <ChevronLeft className="w-4 h-4" />
-                  이전
+                  {t.previous}
                 </Button>
                 
                 <Button 
@@ -282,7 +284,7 @@ export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
                   disabled={!currentAnswer}
                   className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
                 >
-                  {currentQuestion === randomizedQuestions.length - 1 ? '결과 보기' : '다음'}
+                  {currentQuestion === randomizedQuestions.length - 1 ? t.result : t.next}
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>

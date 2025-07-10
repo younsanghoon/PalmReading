@@ -1,45 +1,49 @@
 import { Link } from "wouter";
 import { TestCard } from "@/components/ui/test-card";
 import { AdSpace } from "@/components/ui/ad-space";
+import { LanguageSelector } from "@/components/ui/language-selector";
 import { Brain, Camera, Eye, Hand } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/lib/i18n";
 
 export default function Home() {
+  const { t } = useLanguage();
+  
   const tests = [
     {
       id: 'animal' as const,
-      title: "동물상 분석",
-      description: "AI가 분석하는 나의 동물상을 알아보세요",
+      title: t.animalTest,
+      description: t.animalTestDesc,
       icon: <Camera className="w-6 h-6" />,
       duration: "2-3분",
-      tags: ["AI 분석", "얼굴 인식", "동물상"],
+      tags: ["AI", "Face", "Animal"],
       href: "/animal-test"
     },
     {
       id: 'mbti' as const,
-      title: "MBTI 테스트",
-      description: "16가지 성격 유형 중 나의 유형을 찾아보세요",
+      title: t.mbtiTest,
+      description: t.mbtiTestDesc,
       icon: <Brain className="w-6 h-6" />,
       duration: "5-10분",
-      tags: ["성격 유형", "심리학", "자기 이해"],
+      tags: ["MBTI", "Psychology", "Personality"],
       href: "/mbti-test"
     },
     {
       id: 'enneagram' as const,
-      title: "에겐-테토 테스트",
-      description: "주도적 vs 수용적 성향으로 나의 행동 패턴을 발견하세요",
+      title: t.enneagramTest,
+      description: t.enneagramTestDesc,
       icon: <Eye className="w-6 h-6" />,
       duration: "5-7분",
-      tags: ["행동 패턴", "성향 분석", "궁합"],
+      tags: ["Enneagram", "Behavior", "Compatibility"],
       href: "/enneagram-test"
     },
     {
       id: 'palm' as const,
-      title: "손금 분석",
-      description: "AI가 분석하는 손금으로 나의 운명을 알아보세요",
+      title: t.palmTest,
+      description: t.palmTestDesc,
       icon: <Hand className="w-6 h-6" />,
       duration: "3-5분",
-      tags: ["AI 분석", "손금", "운세"],
+      tags: ["AI", "Palm", "Fortune"],
       href: "/palm-test"
     },
   ];
@@ -48,7 +52,10 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
       {/* Top Ad Banner */}
       <div className="w-full py-4 bg-white dark:bg-gray-900 border-b">
-        <AdSpace type="banner" className="px-4" />
+        <div className="flex justify-between items-center px-4">
+          <AdSpace type="banner" />
+          <LanguageSelector />
+        </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
@@ -66,11 +73,23 @@ export default function Home() {
             <div className="flex-1">
               <div className="text-center mb-12 animate-fade-in">
                 <h1 className="text-5xl font-bold gradient-text mb-6">
-                  성격 분석 테스트
+                  {t.language === 'ko' ? '성격 분석 테스트' : 
+                   t.language === 'en' ? 'Personality Analysis Tests' :
+                   t.language === 'ja' ? '性格分析テスト' :
+                   t.language === 'zh' ? '性格分析测试' :
+                   t.language === 'id' ? 'Tes Analisis Kepribadian' :
+                   t.language === 'th' ? 'การทดสอบวิเคราะห์บุคลิกภาพ' :
+                   t.language === 'vi' ? 'Bài Test Phân Tích Tính Cách' : '성격 분석 테스트'}
                 </h1>
                 <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-                  AI와 심리학이 만나 더 정확한 성격 분석을 제공합니다.
-                  나를 더 잘 이해하고 성장할 수 있는 인사이트를 얻어보세요.
+                  {t.language === 'ko' ? 'AI와 심리학이 만나 더 정확한 성격 분석을 제공합니다. 나를 더 잘 이해하고 성장할 수 있는 인사이트를 얻어보세요.' :
+                   t.language === 'en' ? 'AI and psychology combine to provide more accurate personality analysis. Gain insights to better understand yourself and grow.' :
+                   t.language === 'ja' ? 'AIと心理学が組み合わさり、より正確な性格分析を提供します。自分をよりよく理解し、成長するためのインサイトを得ましょう。' :
+                   t.language === 'zh' ? 'AI与心理学结合，提供更准确的性格分析。获得洞察，更好地了解自己并成长。' :
+                   t.language === 'id' ? 'AI dan psikologi bergabung untuk memberikan analisis kepribadian yang lebih akurat. Dapatkan wawasan untuk memahami diri sendiri dengan lebih baik dan berkembang.' :
+                   t.language === 'th' ? 'AI และจิตวิทยารวมกันเพื่อให้การวิเคราะห์บุคลิกภาพที่แม่นยำยิ่งขึ้น รับข้อมูลเชิงลึกเพื่อเข้าใจตัวเองได้ดีขึ้นและเติบโต' :
+                   t.language === 'vi' ? 'AI và tâm lý học kết hợp để cung cấp phân tích tính cách chính xác hơn. Nhận được những hiểu biết sâu sắc để hiểu bản thân tốt hơn và phát triển.' :
+                   'AI와 심리학이 만나 더 정확한 성격 분석을 제공합니다.'}
                 </p>
                 <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full mt-6"></div>
               </div>

@@ -9,6 +9,7 @@ import { getRandomMBTIQuestions, calculateMBTI, MBTI_TYPES } from "@/lib/persona
 import { Question } from "@/types/personality";
 import { ChevronLeft, ChevronRight, Share2, RotateCcw, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLanguage } from "@/lib/i18n";
 
 interface MBTITestProps {
   open: boolean;
@@ -16,6 +17,7 @@ interface MBTITestProps {
 }
 
 export function MBTITest({ open, onOpenChange }: MBTITestProps) {
+  const { t } = useLanguage();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [currentAnswer, setCurrentAnswer] = useState('');
@@ -251,7 +253,7 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
             </DialogTitle>
           </DialogHeader>
           <div className="flex items-center justify-center h-32">
-            <div className="text-lg text-gray-600">질문을 준비하고 있습니다...</div>
+            <div className="text-lg text-gray-600">{t.preparingQuestions}</div>
           </div>
         </DialogContent>
       </Dialog>
@@ -263,7 +265,7 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-gray-900">
-            MBTI 성격 테스트
+            {t.mbtiTitle}
           </DialogTitle>
         </DialogHeader>
 
@@ -278,11 +280,11 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-bold text-gray-900">
-                    질문 {currentQuestion + 1} / {randomizedQuestions.length}
+                    {t.question} {currentQuestion + 1} {t.of} {randomizedQuestions.length}
                   </h3>
                 </div>
                 <p className="text-lg text-gray-700 mb-6">
-                  {currentQ?.question || '질문을 로드하는 중...'}
+                  {currentQ?.question || t.loading}
                 </p>
               </div>
 
@@ -310,14 +312,14 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
                 disabled={currentQuestion === 0}
               >
                 <ChevronLeft className="w-4 h-4 mr-2" />
-                이전
+                {t.previous}
               </Button>
               <Button
                 onClick={handleNext}
                 disabled={!currentAnswer}
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                {currentQuestion === randomizedQuestions.length - 1 ? '결과 보기' : '다음'}
+                {currentQuestion === randomizedQuestions.length - 1 ? t.result : t.next}
                 <ChevronRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
@@ -329,7 +331,7 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
                 <span className="text-3xl">🧠</span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                당신의 MBTI는...
+                {t.yourMBTI}
               </h3>
               <div className="bg-blue-50 rounded-2xl p-6 mb-6">
                 <h4 className="text-3xl font-bold text-blue-600 mb-2">
