@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link } from "wouter";
 import { TestCard } from "@/components/ui/test-card";
 import { AdSpace } from "@/components/ui/ad-space";

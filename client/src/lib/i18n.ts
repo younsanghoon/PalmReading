@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export type Language = 'ko' | 'en' | 'ja' | 'zh' | 'id' | 'th' | 'vi';
 
