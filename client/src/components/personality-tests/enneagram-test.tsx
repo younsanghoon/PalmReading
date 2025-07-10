@@ -51,6 +51,13 @@ export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
     }
   }, [open]);
 
+  // 질문이 없을 때 초기화
+  useEffect(() => {
+    if (randomizedQuestions.length === 0) {
+      setRandomizedQuestions(generateRandomQuestions());
+    }
+  }, []);
+
   const handleGenderSelect = (selectedGender: Gender) => {
     setGender(selectedGender);
     setGenderSelected(true);

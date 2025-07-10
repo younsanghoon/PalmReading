@@ -45,6 +45,13 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
     }
   }, [open]);
 
+  // 질문이 없을 때 초기화
+  useEffect(() => {
+    if (randomizedQuestions.length === 0) {
+      setRandomizedQuestions(generateRandomQuestions());
+    }
+  }, []);
+
   const handleAnswerChange = (value: string) => {
     setCurrentAnswer(value);
   };
