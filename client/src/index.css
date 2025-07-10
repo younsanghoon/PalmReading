@@ -57,6 +57,24 @@
     @apply bg-background text-foreground;
     background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
     min-height: 100vh;
+    /* 모바일 웹앱 최적화 */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    overscroll-behavior: none;
+  }
+  
+  /* 모바일 최적화 */
+  @media (max-width: 768px) {
+    body {
+      font-size: 16px; /* iOS 줌 방지 */
+    }
+    
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
   }
 }
 
@@ -131,11 +149,100 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
   transition: all 0.3s ease;
+  min-height: 44px; /* 모바일 터치 타겟 최소 크기 */
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+/* 모바일 터치 최적화 */
+@media (max-width: 768px) {
+  .btn-primary,
+  button,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 12px 16px;
+  }
+  
+  /* 다이얼로그 모바일 최적화 */
+  [data-radix-dialog-content] {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    height: 95vh !important;
+    max-height: 95vh !important;
+    margin: 2.5vh auto !important;
+  }
+  
+  /* 카드 간격 조정 */
+  .grid {
+    gap: 0.75rem;
+  }
+  
+  /* 텍스트 크기 조정 */
+  .text-xl {
+    font-size: 1.125rem;
+  }
+  
+  .text-2xl {
+    font-size: 1.25rem;
+  }
+  
+  .text-3xl {
+    font-size: 1.5rem;
+  }
+  
+  .text-4xl {
+    font-size: 1.75rem;
+  }
+  
+  .text-5xl {
+    font-size: 2rem;
+  }
+}
+
+/* PWA 설치 프롬프트 스타일 */
+.install-prompt {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.install-prompt.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* 풀스크린 모드 감지 */
+@media (display-mode: standalone) {
+  .standalone-only {
+    display: block;
+  }
+  
+  .web-only {
+    display: none;
+  }
+}
+
+@media not (display-mode: standalone) {
+  .standalone-only {
+    display: none;
+  }
+  
+  .web-only {
+    display: block;
+  }
 }
 
 :root {

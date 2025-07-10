@@ -26,14 +26,14 @@ export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
   const [genderSelected, setGenderSelected] = useState(false);
 
   // 25개 랜덤 질문 선택 및 순서 섞기
-  const randomizedQuestions = useMemo(() => {
+  const [randomizedQuestions, setRandomizedQuestions] = useState(() => {
     const shuffledQuestions = [...ENNEAGRAM_QUESTIONS].sort(() => Math.random() - 0.5);
     const selected25Questions = shuffledQuestions.slice(0, 25);
     return selected25Questions.map(q => ({
       ...q,
       options: [...q.options].sort(() => Math.random() - 0.5) // 옵션 순서도 랜덤화
     }));
-  }, [open]); // open이 변경될 때마다 새로운 랜덤 질문 생성
+  });
 
   const handleGenderSelect = (selectedGender: Gender) => {
     setGender(selectedGender);
@@ -103,6 +103,14 @@ export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
     setShowResult(false);
     setGender(null);
     setGenderSelected(false);
+    // 질문 다시 랜덤화
+    const shuffledQuestions = [...ENNEAGRAM_QUESTIONS].sort(() => Math.random() - 0.5);
+    const selected25Questions = shuffledQuestions.slice(0, 25);
+    const newRandomizedQuestions = selected25Questions.map(q => ({
+      ...q,
+      options: [...q.options].sort(() => Math.random() - 0.5)
+    }));
+    setRandomizedQuestions(newRandomizedQuestions);
   };
 
   const handleShare = async () => {
@@ -197,7 +205,7 @@ export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
               </div>
               
               <ProgressBar 
-                value={((currentQuestion + 1) / randomizedQuestions.length) * 100} 
+                value={Math.round(((currentQuestion + 1) / randomizedQuestions.length) * 100)} 
                 className="mb-6"
               />
               
@@ -257,7 +265,7 @@ export function EnneagramTest({ open, onOpenChange }: EnneagramTestProps) {
                 <div>
                   <h2 className="text-3xl font-bold mb-2">{result.type}</h2>
                   <p className="text-xl text-gray-600 dark:text-gray-300">
-                    {result.score}% 확률
+                    {Math.round(result.score)}% 확률
                   </p>
                 </div>
               </div>

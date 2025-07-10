@@ -75,6 +75,13 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
     setCurrentAnswer('');
     setResult(null);
     setShowResult(false);
+    // 질문 다시 랜덤화
+    const shuffled = [...MBTI_QUESTIONS].sort(() => Math.random() - 0.5);
+    const shuffledWithOptions = shuffled.map(q => ({
+      ...q,
+      options: [...q.options].sort(() => Math.random() - 0.5)
+    }));
+    setRandomizedQuestions(shuffledWithOptions);
   };
 
   const handleShare = async () => {
@@ -229,7 +236,7 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
         {!showResult ? (
           <div className="space-y-8">
             <ProgressBar 
-              value={((currentQuestion + 1) / randomizedQuestions.length) * 100}
+              value={Math.round(((currentQuestion + 1) / randomizedQuestions.length) * 100)}
               className="mb-6"
             />
 
