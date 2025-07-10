@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import * as React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -34,7 +33,7 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
   };
 
   // 컴포넌트 초기화 또는 다이얼로그가 열릴 때 질문 생성
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
       // 다이얼로그가 열릴 때마다 완전히 새로운 질문 세트 생성
       setCurrentQuestion(0);
