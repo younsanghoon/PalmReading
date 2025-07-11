@@ -44,12 +44,11 @@
         console.log("[SPA Redirect] Environment:", isDev ? "development" : "production");
         console.log("[SPA Redirect] Hostname:", l.hostname);
         
-        // 프로덕션 환경에서 base path 제거
-        if (!isDev && pathname.startsWith('/PalmReading')) {
-          var newPath = pathname.replace('/PalmReading', '') || '/';
-          console.log("[SPA Redirect] Removing base path, new path:", newPath);
-          window.history.replaceState(null, null, newPath + l.search + l.hash);
-        }
+              // 프로덕션 환경에서 base path 유지 (수정됨)
+      if (!isDev && pathname.startsWith('/PalmReading')) {
+        console.log("[SPA Redirect] Keeping base path:", pathname);
+        // base path를 제거하지 않고 유지
+      }
         
         // SPA 라우트 목록
         var spaRoutes = ['/', '/animal-test', '/mbti-test', '/enneagram-test', '/palm-test', 

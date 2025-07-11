@@ -5,12 +5,20 @@
   <title>성격 분석 테스트 센터</title>
   <script type="text/javascript">
     // SPA 라우팅을 위한 리다이렉트 - GitHub Pages의 저장소 이름을 고려
-    var pathSegmentsToKeep = 1;
+    var segmentCount = 1; // PalmReading 저장소를 위한 설정
     var l = window.location;
+    
+    // 디버그 로그
+    console.log("404 redirect - Original URL:", l.href);
+    console.log("404 redirect - Pathname:", l.pathname);
+    
+    // GitHub Pages 저장소 경로 유지
+    var repoPath = "/PalmReading";
+    
     l.replace(
       l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-      l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-      l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+      repoPath + '/?/' +
+      l.pathname.slice(1).split('/').slice(segmentCount).join('/').replace(/&/g, '~and~') +
       (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
       l.hash
     );
@@ -19,4 +27,4 @@
 <body>
   리다이렉트 중...
 </body>
-</html> 
+</html>
