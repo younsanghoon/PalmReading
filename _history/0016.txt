@@ -1,0 +1,40 @@
+# 작업 기록 - 광고 통합
+
+## 날짜: 2023년 5월 28일
+
+## 수행한 작업
+1. Google AdSense 통합
+   - client/index.html 파일에 Google AdSense 스크립트 추가
+   - 스크립트 ID: ca-pub-6706508307630636
+
+2. AdSpace 컴포넌트 업데이트
+   - 기존 더미 광고 영역을 실제 광고로 대체
+   - Google AdSense 광고 표시 기능 구현
+   - 알리익스프레스 어필리에이트 광고 유형 추가
+
+3. 알리익스프레스 어필리에이트 광고 추가
+   - 상품: AULA F108 pro 무선 블루투스 키보드
+   - 가격: USD 45.38 (9% 할인)
+   - 어필리에이트 링크: https://s.click.aliexpress.com/e/_opex1Vi
+
+4. App.tsx 업데이트
+   - AdSpace 컴포넌트 통합
+   - Google AdSense 광고와 알리익스프레스 어필리에이트 광고 표시
+
+## 주요 변경 사항
+1. client/index.html
+   - head 태그 내에 Google AdSense 스크립트 추가
+
+2. client/src/components/ui/ad-space.tsx
+   - useRef와 useEffect를 사용하여 AdSense 광고 로드 로직 구현
+   - 'affiliate' 타입 추가 및 해당 UI 구현
+   - 실제 광고 표시를 위한 코드 구현
+
+3. client/src/App.tsx
+   - AdSpace 컴포넌트 import 및 사용
+   - 레이아웃 구조 개선 (flex-col 사용)
+
+## 다음 단계
+1. 광고 표시 테스트
+2. 다양한 광고 크기 및 위치 최적화
+3. 광고 수익 추적 설정 
