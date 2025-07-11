@@ -84,7 +84,7 @@ async function loadModel(modelURL: string, metadataURL: string): Promise<tmImage
       return fallbackModel as any;
     } catch (fallbackError) {
       console.error('[AI-Models] Fallback model creation failed:', fallbackError);
-      throw new Error(`Failed to load model and create fallback: ${error}`);
+      throw new Error(`Failed to load model and create fallback: ${(error as Error).message}`);
     }
   }
 }

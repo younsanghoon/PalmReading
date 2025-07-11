@@ -1,0 +1,30 @@
+# 작업 기록: GitHub Pages 배포 문제 해결 (2차 시도)
+
+## 날짜: 2024-07-10
+
+## 작업 내용
+1. GitHub Pages 배포 문제 분석
+   - 기존 배포된 사이트가 "성격 분석 테스트" 프로젝트 내용을 표시하고 있음
+   - 같은 GitHub 계정에서 호스팅되는 다른 프로젝트와 충돌 발생
+
+2. GitHub Pages 배포 설정 개선
+   - 새로운 브랜치(pages-fix) 생성
+   - GitHub Actions 워크플로우 파일(.github/workflows/static.yml) 수정
+   - 앱 정보 및 경로 수정
+     - client/index.html: 메타데이터 및 경로 수정
+     - client/public/404.html: 타이틀 수정
+     - client/public/manifest.json: 앱 정보 및 경로 수정
+
+3. Pull Request 생성 및 병합
+   - "Fix GitHub Pages deployment configuration" 제목의 PR 생성
+   - main 브랜치에 변경사항 병합
+
+## 다음 단계
+1. GitHub 저장소 설정 변경
+   - GitHub 저장소 > Settings > Pages 메뉴 접속
+   - Source를 "GitHub Actions"로 설정
+
+2. GitHub Actions 워크플로우 실행 확인
+   - Actions 탭에서 워크플로우 실행 상태 확인
+   - 배포 완료 후 https://younsanghoon.github.io/PalmReading/ URL 접속
+   - 올바른 PalmReading 프로젝트 내용이 표시되는지 확인 

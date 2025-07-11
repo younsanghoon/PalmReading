@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 
 interface UseImageUploadReturn {
   imageFile: File | null;
-  imageUrl: string | null;
+  imageUrl: string | undefined;
   isUploading: boolean;
   error: string | null;
   uploadImage: (file: File) => Promise<void>;
@@ -13,7 +13,7 @@ interface UseImageUploadReturn {
 
 export function useImageUpload(): UseImageUploadReturn {
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,7 +56,7 @@ export function useImageUpload(): UseImageUploadReturn {
 
   const clearImage = useCallback(() => {
     setImageFile(null);
-    setImageUrl(null);
+    setImageUrl(undefined);
     setError(null);
   }, []);
 

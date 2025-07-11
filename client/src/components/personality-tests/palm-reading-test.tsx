@@ -40,10 +40,10 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
   const metadataURL = '/attached_assets/metadata.json';
   
   const { 
-    model,
-    predict,
     isLoading: isAnalyzing, 
-    error: analysisError 
+    error: analysisError,
+    model,
+    predictPalm
   } = useTeachableMachine({ modelURL, metadataURL });
 
   // 모델 로드 상태 체크
@@ -100,10 +100,10 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
         videoElement: videoRef.current,
         canvasElement: canvasRef.current,
         photoElement: photoRef.current,
-        startButton: document.getElementById('startCameraButton'),
-        captureButton: document.getElementById('captureCameraButton'),
-        switchButton: document.getElementById('switchCameraButton'),
-        cameraSelect: document.getElementById('cameraSelect'),
+        startButton: document.getElementById('startCameraButton') as HTMLButtonElement | null,
+        captureButton: document.getElementById('captureCameraButton') as HTMLButtonElement | null,
+        switchButton: document.getElementById('switchCameraButton') as HTMLButtonElement | null,
+        cameraSelect: document.getElementById('cameraSelect') as HTMLSelectElement | null,
         onPhotoCapture: (dataUrl: string) => {
           setImageUrl(dataUrl);
           // 카메라 모드 종료 후 분석 단계로 이동
@@ -132,8 +132,8 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
     setCurrentStep('analyzing');
     
     try {
-      // 직접 AI 모델 라이브러리의 함수를 사용하여 예측
-      const predictions = await predictPalmReading(imageElement);
+      // predictPalm 함수 사용
+      const predictions = await predictPalm(imageElement);
       
       // Process palm reading results
       const palmResult = {

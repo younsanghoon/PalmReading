@@ -1,0 +1,30 @@
+# 작업 기록: GitHub Pages 배포 방식 변경
+
+## 날짜: 2024-07-10
+
+## 작업 내용
+1. GitHub Pages 배포 문제 지속 확인
+   - 이전 방법으로는 404 오류가 계속 발생
+   - GitHub Actions 워크플로우 대신 직접 gh-pages 브랜치 생성 방식으로 전환
+
+2. gh-pages 브랜치 생성 및 설정
+   - `git checkout -b gh-pages` 명령으로 새 브랜치 생성
+   - `npm run build` 명령으로 프로젝트 빌드
+   - 빌드된 파일들(dist/public)을 루트 디렉토리로 복사
+   - GitHub Pages를 위한 CNAME 및 .nojekyll 파일 생성
+
+3. 변경사항 커밋 및 푸시
+   - 커밋 메시지: "Add built files for GitHub Pages"
+   - `git push origin gh-pages --force` 명령으로 GitHub에 푸시
+
+## 다음 단계
+1. GitHub 저장소 설정 변경 필요
+   - GitHub 저장소 > Settings > Pages 메뉴 접속
+   - Source를 "Deploy from a branch"로 변경
+   - Branch를 "gh-pages"로 선택
+   - Save 버튼 클릭하여 설정 저장
+
+2. 배포 확인
+   - 배포 완료 후 https://younsanghoon.github.io/PalmReading/ URL 접속
+   - 모든 페이지 및 기능 정상 작동 확인
+   - 새로고침 시 404 오류가 해결되었는지 테스트 

@@ -14,10 +14,8 @@ function App() {
   const [location, setLocation] = useLocation();
 
   useEffect(() => {
-    // 루트 경로('/')에 접속했을 때 자동으로 홈페이지로 리다이렉트
-    if (location === "/" || location === "/PalmReading" || location === "/PalmReading/") {
-      console.log("Redirecting to home page");
-    }
+    // 현재 경로 로깅
+    console.log("Current location:", location);
   }, [location]);
 
   return (
@@ -26,12 +24,19 @@ function App() {
       <Route path="/PalmReading" component={Home} />
       <Route path="/PalmReading/" component={Home} />
       <Route path="/animal-test" component={AnimalTest} />
+      <Route path="/PalmReading/animal-test" component={AnimalTest} />
       <Route path="/mbti-test" component={MbtiTest} />
+      <Route path="/PalmReading/mbti-test" component={MbtiTest} />
       <Route path="/enneagram-test" component={EnneagramTest} />
+      <Route path="/PalmReading/enneagram-test" component={EnneagramTest} />
       <Route path="/palm-test" component={PalmTest} />
+      <Route path="/PalmReading/palm-test" component={PalmTest} />
       <Route path="/privacy-policy" component={PrivacyPolicy} />
+      <Route path="/PalmReading/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
+      <Route path="/PalmReading/terms-of-service" component={TermsOfService} />
       <Route path="/contact" component={Contact} />
+      <Route path="/PalmReading/contact" component={Contact} />
       <Route component={NotFound} />
     </Switch>
   );
