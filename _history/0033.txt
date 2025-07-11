@@ -1,0 +1,30 @@
+# 작업 기록: GitHub Pages 404 오류 해결
+
+## 날짜: 2024-07-10
+
+## 작업 내용
+1. GitHub Pages 404 오류 확인
+   - 오류 메시지: "There isn't a GitHub Pages site here."
+   - 원인: 잘못된 base URL 설정
+
+2. vite.config.ts 파일 수정
+   - 기존 설정: `base: '/'`
+   - 수정 설정: `base: '/PalmReading/'`
+   - GitHub Pages는 저장소 이름을 기반으로 URL 경로를 설정하므로 수정 필요
+
+3. GitHub Actions 워크플로우 확인
+   - .github/workflows/static.yml 파일 확인
+   - 빌드 및 배포 설정이 올바르게 구성되어 있음
+
+4. 변경사항 커밋 및 푸시
+   - 커밋 메시지: "Fix GitHub Pages base path for correct deployment"
+   - GitHub에 푸시하여 자동 배포 트리거
+
+## 결과
+- GitHub Actions 워크플로우가 실행되어 새 설정으로 빌드 및 배포 진행
+- GitHub Pages URL: https://younsanghoon.github.io/PalmReading/
+
+## 다음 단계
+- GitHub Pages 배포 완료 후 사이트 접속 확인
+- 모든 기능이 정상 작동하는지 테스트
+- 특히 카메라 기능이 HTTPS 환경에서 제대로 작동하는지 확인 

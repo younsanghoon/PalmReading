@@ -1,10 +1,12 @@
 import React from "react";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdSpace } from "@/components/ui/ad-space";
 
 export default function PrivacyPolicyPage() {
+  const [_, navigate] = useLocation();
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Top Ad Banner */}
@@ -16,12 +18,14 @@ export default function PrivacyPolicyPage() {
         <div className="max-w-4xl mx-auto">
           {/* Navigation */}
           <div className="flex items-center gap-4 mb-8">
-            <Link href="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                홈으로
-              </Button>
-            </Link>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => navigate("/")}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              홈으로
+            </Button>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-lg">

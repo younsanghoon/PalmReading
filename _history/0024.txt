@@ -1,0 +1,39 @@
+# 작업 내역: 손금 테스트 페이지 오류 수정
+
+## 문제 상황
+- 손금 테스트(palm-test) 페이지에서 `modelURL` 속성에 접근하려고 할 때 `undefined` 오류 발생
+- 브라우저 콘솔에 다음 오류 메시지 표시: `[plugin:runtime-error-plugin] Cannot destructure property 'modelURL' of 'undefined' as it is undefined.`
+
+## 조사 과정
+1. palm-reading-test.tsx 컴포넌트 코드 검토
+2. useTeachableMachine.ts 훅 검토
+3. ResultChart 컴포넌트 타입 검토
+
+## 문제 원인
+1. `useTeachableMachine` 훅 호출 시 필수 매개변수인 `modelURL`과 `metadataURL`을 전달하지 않음
+2. `ResultChart` 컴포넌트 사용 시 필수 속성인 `type`을 전달하지 않음
+3. `getChartData()` 함수가 `null`을 반환할 수 있는데 이에 대한 조건부 처리 부재
+
+## 수정 내용
+1. palm-reading-test.tsx
+   - `modelURL`과 `metadataURL` 상수 추가 및 `useTeachableMachine` 훅에 전달
+   - `predictPalm` 대신 `predict` 사용 및 직접 `predictPalmReading` 함수 호출
+   - `ResultChart` 컴포넌트에 `type="radar"` 속성 추가
+   - `getChartData()`가 `null`일 경우 조건부 렌더링 처리
+   - 오류 처리 로직 개선 (try-catch 추가)
+
+2. 디자인 개선
+   - 능력선 분석 결과 섹션 추가
+   - 궁합 분석 UI 개선
+   - 버튼 레이아웃 및 스타일 개선
+
+## 결과
+- 손금 테스트 페이지가 정상적으로 로드되고 실행됨
+- 모델 로딩 및 예측 과정에서 오류 발생 시 적절한 피드백 제공
+- 결과 차트 및 UI 개선으로 사용자 경험 향상
+
+## 교훈
+- 외부 라이브러리나 커스텀 훅 사용 시 필수 매개변수 확인 필요
+- 컴포넌트의 타입 정의를 준수하여 타입 오류 방지
+- 조건부 렌더링을 통해 null/undefined 값 처리 필요
+- 오류 처리 로직을 통해 사용자에게 적절한 피드백 제공 중요 

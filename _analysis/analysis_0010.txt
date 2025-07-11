@@ -1,0 +1,100 @@
+# PalmReading 프로젝트 분석 - 의존성 잠금 파일 문제 해결
+
+## GitHub Actions 워크플로우 오류 상세 분석
+
+### 오류 내용
+```
+Error: Dependencies lock file is not found in /home/runner/work/PalmReading/PalmReading. Supported file patterns: package-lock.json,npm-shrinkwrap.json,yarn.lock
+```
+
+### 오류 원인
+1. **의존성 잠금 파일 누락**:
+   - GitHub 저장소에 package-lock.json, npm-shrinkwrap.json, yarn.lock 파일이 없음
+   - actions/setup-node@v3 액션이 npm 캐시를 설정하기 위해 이러한 파일을 필요로 함
+   - `cache: 'npm'` 옵션이 설정되어 있으나 해당 파일이 없어 오류 발생
+
+2. **캐시 설정 문제**:
+   - 워크플로우 파일에서 Node.js 설정 시 캐시 옵션이 활성화됨
+   - 캐시를 사용하려면 의존성 잠금 파일이 필요함
+
+## 해결 방안
+
+### 방안 1: 의존성 잠금 파일 생성 및 추가
+1. **로컬 환경에서 package-lock.json 생성**:
+   ```bash
+   # 프로젝트 디렉토리에서 실행
+   npm install
+   # 또는 npm i --package-lock-only
+   ```
+
+2. **생성된 파일을 저장소에 추가**:
+   ```bash
+   git add package-lock.json
+   git commit -m "Add package-lock.json for GitHub Actions"
+   git push origin main
+   ```
+
+3. **장점**:
+   - npm 의존성 캐싱을 통한 빌드 속도 향상
+   - 일관된 의존성 버전 보장
+
+### 방안 2: 워크플로우 파일에서 캐시 설정 제거
+1. **워크플로우 파일 수정**:
+   ```yaml
+   - name: Set up Node
+     uses: actions/setup-node@v3
+     with:
+       node-version: 18
+       # cache: 'npm' 제거
+   ```
+
+2. **장점**:
+   - 즉시 문제 해결 가능
+   - 의존성 잠금 파일 관리 불필요
+
+3. **단점**:
+   - 빌드 속도 저하
+   - 의존성 버전 불일치 가능성
+
+### 방안 3: 캐시 경로 직접 지정
+1. **워크플로우 파일 수정**:
+   ```yaml
+   - name: Set up Node
+     uses: actions/setup-node@v3
+     with:
+       node-version: 18
+       cache: 'npm'
+       cache-dependency-path: './package.json'
+   ```
+
+2. **장점**:
+   - package.json 기반으로 캐싱 가능
+   - 잠금 파일 없이도 캐싱 가능
+
+3. **단점**:
+   - 정확한 의존성 버전 보장 어려움
+
+## 권장 해결책
+
+### 최적의 방안: 방안 1 + 방안 3 조합
+1. **로컬에서 package-lock.json 생성**
+2. **저장소에 추가**
+3. **워크플로우 파일에 캐시 경로 명시적 지정**:
+   ```yaml
+   - name: Set up Node
+     uses: actions/setup-node@v3
+     with:
+       node-version: 18
+       cache: 'npm'
+       cache-dependency-path: './package-lock.json'
+   ```
+
+### 빠른 해결을 위한 방안: 방안 2
+- 캐시 설정을 완전히 제거하여 즉시 문제 해결
+- 추후 최적화를 위해 package-lock.json 추가 고려
+
+## 다음 단계
+1. 선택한 방안에 따라 필요한 파일 생성 또는 워크플로우 수정
+2. 변경사항 커밋 및 푸시
+3. GitHub Actions 워크플로우 재실행
+4. 빌드 및 배포 결과 확인 

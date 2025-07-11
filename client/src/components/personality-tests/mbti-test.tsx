@@ -27,6 +27,7 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
 
   // 테스트 시작/재시작 시 질문 랜덤화 함수
   const generateRandomQuestions = () => {
+    console.log("[MBTITest] Generating random questions");
     const questions = getRandomMBTIQuestions();
     return questions.map(q => ({
       ...q,
@@ -37,6 +38,7 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
   // 컴포넌트 초기화 또는 다이얼로그가 열릴 때 질문 생성
   useEffect(() => {
     if (open) {
+      console.log("[MBTITest] Dialog opened, initializing test");
       // 다이얼로그가 열릴 때마다 완전히 새로운 질문 세트 생성
       setCurrentQuestion(0);
       setAnswers([]);
@@ -50,27 +52,37 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
   // 질문이 없을 때 초기화
   useEffect(() => {
     if (randomizedQuestions.length === 0) {
+      console.log("[MBTITest] No questions available, initializing");
       setRandomizedQuestions(generateRandomQuestions());
     }
   }, []);
 
   const handleAnswerChange = (value: string) => {
+    console.log("[MBTITest] Answer selected:", value);
     setCurrentAnswer(value);
   };
 
   const handleNext = () => {
-    if (!currentAnswer) return;
+    if (!currentAnswer) {
+      console.log("[MBTITest] No answer selected, cannot proceed");
+      return;
+    }
 
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = currentAnswer;
     setAnswers(newAnswers);
+    
+    console.log(`[MBTITest] Question ${currentQuestion + 1}/${randomizedQuestions.length} answered:`, currentAnswer);
 
     if (currentQuestion < randomizedQuestions.length - 1) {
+      console.log("[MBTITest] Moving to next question:", currentQuestion + 2);
       setCurrentQuestion(currentQuestion + 1);
       setCurrentAnswer(newAnswers[currentQuestion + 1] || '');
     } else {
       // Calculate result
+      console.log("[MBTITest] All questions answered, calculating result");
       const mbtiResult = calculateMBTI(newAnswers);
+      console.log("[MBTITest] Result:", mbtiResult);
       setResult(mbtiResult);
       
       // Save to localStorage
@@ -80,6 +92,7 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
         timestamp: new Date().toISOString()
       };
       localStorage.setItem('personalityResults', JSON.stringify(results));
+      console.log("[MBTITest] Result saved to localStorage");
       
       setShowResult(true);
     }
@@ -87,12 +100,14 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
 
   const handlePrevious = () => {
     if (currentQuestion > 0) {
+      console.log("[MBTITest] Moving to previous question:", currentQuestion);
       setCurrentQuestion(currentQuestion - 1);
       setCurrentAnswer(answers[currentQuestion - 1] || '');
     }
   };
 
   const handleReset = () => {
+    console.log("[MBTITest] Resetting test");
     setCurrentQuestion(0);
     setAnswers([]);
     setCurrentAnswer('');
@@ -105,20 +120,24 @@ export function MBTITest({ open, onOpenChange }: MBTITestProps) {
   const handleShare = async () => {
     if (navigator.share) {
       try {
+        console.log("[MBTITest] Sharing result using Web Share API");
         await navigator.share({
           title: 'MBTI 성격 테스트 결과',
           text: `나의 MBTI는 ${result.type}(${MBTI_TYPES[result.type as keyof typeof MBTI_TYPES]?.name})입니다!`,
           url: window.location.href
         });
+        console.log("[MBTITest] Share successful");
       } catch (err) {
-        console.log('Sharing failed:', err);
+        console.log('[MBTITest] Sharing failed:', err);
       }
     } else {
       try {
+        console.log("[MBTITest] Web Share API not available, copying to clipboard");
         await navigator.clipboard.writeText(window.location.href);
         alert('링크가 클립보드에 복사되었습니다!');
+        console.log("[MBTITest] Link copied to clipboard");
       } catch (err) {
-        console.log('Copy failed:', err);
+        console.log('[MBTITest] Copy failed:', err);
       }
     }
   };

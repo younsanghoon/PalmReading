@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from "wouter";
+import React, { useEffect } from 'react';
+import { Link, useLocation } from "wouter";
 import { TestCard } from "@/components/ui/test-card";
 import { AdSpace } from "@/components/ui/ad-space";
 import { LanguageSelector } from "@/components/ui/language-selector";
@@ -9,6 +9,23 @@ import { useLanguage } from "@/lib/i18n";
 
 export default function Home() {
   const { t } = useLanguage();
+  const [location, navigate] = useLocation();
+  
+  useEffect(() => {
+    console.log("[Home] Component mounted, current location:", location);
+    console.log("[Home] Window location pathname:", window.location.pathname);
+    console.log("[Home] Window location href:", window.location.href);
+    
+    // 라우팅 상태 디버깅
+    if ((window as any).__debugRouter) {
+      console.log("[Home] Debug router state:");
+      (window as any).__debugRouter.logRouteState();
+    }
+    
+    return () => {
+      console.log("[Home] Component unmounted");
+    };
+  }, [location]);
   
   const tests = [
     {
@@ -48,6 +65,106 @@ export default function Home() {
       href: "/palm-test"
     },
   ];
+
+  const handleTestClick = (href: string) => {
+    console.log("[Home] Test card clicked, navigating to:", href);
+    console.log("[Home] Current location before navigation:", location);
+    console.log("[Home] Window location before navigation:", window.location.href);
+    
+    // 경로가 슬래시로 시작하는지 확인하고, 시작하지 않으면 슬래시 추가
+    const normalizedHref = href.startsWith('/') ? href : `/${href}`;
+    console.log("[Home] Normalized href:", normalizedHref);
+    
+    // 개발 환경 확인
+    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    console.log("[Home] Environment:", isDev ? "development" : "production");
+    
+    // 현재 위치와 목적지가 같은지 확인
+    if (location === normalizedHref) {
+      console.log("[Home] Already at this location, forcing page reload");
+      window.location.href = normalizedHref;
+      return;
+    }
+    
+    // 네비게이션 시도 전 상태 로깅
+    console.log("[Home] Navigation attempt - Details:");
+    console.log("[Home] - Target href:", normalizedHref);
+    console.log("[Home] - Current location:", location);
+    console.log("[Home] - Window location:", window.location.href);
+    console.log("[Home] - Window pathname:", window.location.pathname);
+    
+    try {
+      // 디버그용 전역 함수가 있으면 사용
+      if ((window as any).__debugRouter) {
+        console.log("[Home] Debug router detected, using it for navigation");
+        try {
+          (window as any).__debugRouter.goTo(normalizedHref);
+          console.log("[Home] Debug router navigation completed");
+          
+          // 디버그 라우터 상태 확인
+          setTimeout(() => {
+            console.log("[Home] Debug router state after navigation:");
+            (window as any).__debugRouter.logRouteState();
+          }, 100);
+          
+          return;
+        } catch (debugError) {
+          console.error("[Home] Debug router navigation failed:", debugError);
+        }
+      }
+      
+      // wouter의 navigate 함수 시도
+      console.log("[Home] Attempting to use wouter navigate");
+      try {
+        navigate(normalizedHref);
+        console.log("[Home] Wouter navigation completed");
+        
+        // 네비게이션 후 경로 확인
+        setTimeout(() => {
+          console.log("[Home] Location after wouter navigation:", window.location.pathname);
+          
+          // 경로가 변경되지 않았으면 직접 URL 변경
+          if (window.location.pathname !== normalizedHref) {
+            console.log("[Home] Wouter navigation did not update URL, using direct navigation");
+            window.location.href = normalizedHref;
+          }
+        }, 100);
+        
+        return;
+      } catch (wouterError) {
+        console.error("[Home] Wouter navigation failed:", wouterError);
+      }
+      
+      // 마지막 방법: 직접 URL 변경
+      console.log("[Home] Using direct URL navigation to:", normalizedHref);
+      window.location.href = normalizedHref;
+    } catch (error) {
+      console.error("[Home] Navigation error:", error);
+      // 오류 발생 시 직접 URL 변경
+      console.log("[Home] Falling back to direct URL change after error");
+      window.location.href = normalizedHref;
+    }
+  };
+
+  // 푸터 링크 네비게이션 함수
+  const handleFooterNavigation = (path: string) => {
+    console.log("[Home] Footer navigation to:", path);
+    
+    try {
+      // 디버그용 전역 함수가 있으면 사용
+      if ((window as any).__debugRouter) {
+        console.log("[Home] Using debug router for footer navigation");
+        (window as any).__debugRouter.goTo(path);
+      } else {
+        // 직접 URL 변경
+        console.log("[Home] Using direct URL for footer navigation");
+        window.location.href = path;
+      }
+    } catch (error) {
+      console.error("[Home] Footer navigation error:", error);
+      window.location.href = path;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
@@ -102,17 +219,17 @@ export default function Home() {
 
               <div className="grid md:grid-cols-2 gap-6 mb-8">
                 {tests.map((test) => (
-                  <Link key={test.id} href={test.href}>
+                  <div key={test.id} onClick={() => handleTestClick(test.href)}>
                     <TestCard
                       title={test.title}
                       description={test.description}
                       icon={test.icon}
                       duration={test.duration}
                       tags={test.tags}
-                      onClick={() => {}}
+                      onClick={() => handleTestClick(test.href)}
                       className="cursor-pointer test-card animate-slide-up"
                     />
-                  </Link>
+                  </div>
                 ))}
               </div>
 
@@ -161,21 +278,30 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex gap-4">
-                <Link href="/privacy-policy">
-                  <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                    개인정보 보호정책
-                  </Button>
-                </Link>
-                <Link href="/terms-of-service">
-                  <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                    이용약관
-                  </Button>
-                </Link>
-                <Link href="/contact">
-                  <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                    문의하기
-                  </Button>
-                </Link>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-gray-400 hover:text-white"
+                  onClick={() => handleFooterNavigation("/privacy-policy")}
+                >
+                  개인정보 보호정책
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-gray-400 hover:text-white"
+                  onClick={() => handleFooterNavigation("/terms-of-service")}
+                >
+                  이용약관
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-gray-400 hover:text-white"
+                  onClick={() => handleFooterNavigation("/contact")}
+                >
+                  문의하기
+                </Button>
               </div>
             </div>
             <div className="mt-6 pt-4 border-t border-gray-800 text-center text-sm text-gray-400">

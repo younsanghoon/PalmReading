@@ -1,19 +1,40 @@
-import * as React from "react"
+import { useState, useEffect } from 'react';
 
-const MOBILE_BREAKPOINT = 768
+export function useMobile() {
+  const [isMobile, setIsMobile] = useState(false);
 
-export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+      
+      const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+      const isMobileDevice = mobileRegex.test(userAgent);
+      
+      const isSmallScreen = window.innerWidth < 768;
+      
+      const result = isMobileDevice || isSmallScreen;
+      console.log('[useMobile] Device detection:', { 
+        userAgent, 
+        isMobileDevice, 
+        isSmallScreen, 
+        result 
+      });
+      
+      setIsMobile(result);
+    };
 
-  React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-    const onChange = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    }
-    mql.addEventListener("change", onChange)
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    return () => mql.removeEventListener("change", onChange)
-  }, [])
+    // 초기 체크
+    checkMobile();
 
-  return !!isMobile
+    // 화면 크기 변경 시 체크
+    window.addEventListener('resize', checkMobile);
+
+    // 클린업
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      console.log('[useMobile] Cleanup: removed resize listener');
+    };
+  }, []);
+
+  return isMobile;
 }

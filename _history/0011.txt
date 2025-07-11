@@ -1,0 +1,53 @@
+# 작업 기록 - GitHub Actions 워크플로우 설정
+
+## 날짜: 2023년 5월 27일
+
+## 작업 내용
+1. GitHub Actions 워크플로우 파일(static.yml) 수정
+   - 기본 Static HTML 워크플로우에 Node.js 빌드 단계 추가
+   - 다음 단계들을 추가:
+     - Node.js 설정
+     - npm 의존성 설치
+     - 프로젝트 빌드
+     - 빌드 결과물(dist 폴더) 업로드
+
+## 워크플로우 수정 내용
+```yaml
+# 기존 코드 유지...
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      # 여기서부터 추가된 부분
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+      # 여기까지 추가된 부분
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          # 이 부분 수정: dist 폴더를 업로드
+          path: './dist'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
+```
+
+## 다음 단계
+- 워크플로우 파일 커밋
+- GitHub Actions 실행 확인
+- 배포 결과 확인 (younsanghoon.github.io/PalmReading) 

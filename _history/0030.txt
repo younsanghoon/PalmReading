@@ -1,0 +1,22 @@
+# 2025-07-12 01:40 - 모델 로딩 오류 해결
+
+## 문제 상황
+- `/animal-test`와 `/palm-test` 페이지에서 AI 모델 로딩 시 오류 발생
+- 서버 로그에서 `/attached_assets/weights.bin` 파일을 찾지 못하는 문제 확인
+
+## 원인 분석
+1. 모델 파일들이 프로젝트 루트의 `attached_assets` 디렉토리에 있었으나, 클라이언트에서 접근할 수 없었음
+2. 서버 로그에서 `/attached_assets/model_1752161703239.json`, `/attached_assets/weights_1752161703239.bin` 등의 파일을 요청하고 있었음
+3. 이 파일들이 public 디렉토리에 없어서 제대로 서빙되지 않았음
+
+## 해결 과정
+1. `client/public/attached_assets` 디렉토리 생성
+2. 모델 파일들을 `attached_assets` 디렉토리에서 `client/public/attached_assets`로 복사
+   - `model_1752161703239.json`
+   - `metadata_1752161703239.json`
+   - `weights_1752161703239.bin`
+3. 추가로 모델 파일들을 `client/public` 디렉토리에도 복사하여 중복 경로 문제 해결
+
+## 결과
+- 모델 파일들이 정적 파일로 올바르게 서빙됨
+- `/animal-test`와 `/palm-test` 페이지에서 모델 로딩 오류 해결 

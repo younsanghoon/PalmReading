@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "wouter";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdSpace } from "@/components/ui/ad-space";
@@ -7,6 +7,24 @@ import { MBTITest } from "@/components/personality-tests/mbti-test";
 
 export default function MBTITestPage() {
   const [isTestOpen, setIsTestOpen] = useState(false);
+  const [location, navigate] = useLocation();
+
+  useEffect(() => {
+    console.log("[MBTITest] Component mounted, current location:", location);
+    return () => {
+      console.log("[MBTITest] Component unmounted");
+    };
+  }, [location]);
+
+  const handleOpenTest = () => {
+    console.log("[MBTITest] Opening test modal");
+    setIsTestOpen(true);
+  };
+
+  const handleNavigateHome = () => {
+    console.log("[MBTITest] Navigating to home");
+    navigate("/");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
@@ -19,12 +37,14 @@ export default function MBTITestPage() {
         <div className="max-w-4xl mx-auto">
           {/* Navigation */}
           <div className="flex items-center gap-4 mb-8">
-            <Link href="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                홈으로
-              </Button>
-            </Link>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleNavigateHome}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              홈으로
+            </Button>
           </div>
 
           {/* Main Content */}
@@ -69,7 +89,7 @@ export default function MBTITestPage() {
               {/* Start Test Button */}
               <div className="text-center">
                 <Button
-                  onClick={() => setIsTestOpen(true)}
+                  onClick={handleOpenTest}
                   className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white px-8 py-3 text-lg"
                 >
                   테스트 시작하기
@@ -91,7 +111,13 @@ export default function MBTITestPage() {
       </div>
 
       {/* Test Modal */}
-      <MBTITest open={isTestOpen} onOpenChange={setIsTestOpen} />
+      <MBTITest 
+        open={isTestOpen} 
+        onOpenChange={(open) => {
+          console.log("[MBTITest] Modal state changed:", open);
+          setIsTestOpen(open);
+        }} 
+      />
     </div>
   );
 }

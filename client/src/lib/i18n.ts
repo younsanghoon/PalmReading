@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react';
 export type Language = 'ko' | 'en' | 'ja' | 'zh' | 'id' | 'th' | 'vi';
 
 export interface Translations {
+  // Current language
+  language: Language;
+  
   // Navigation
   home: string;
   animalTest: string;
@@ -67,6 +70,9 @@ export interface Translations {
 
 export const translations: Record<Language, Translations> = {
   ko: {
+    // Current language
+    language: 'ko',
+    
     // Navigation
     home: '홈',
     animalTest: '동물상 테스트',
@@ -130,6 +136,9 @@ export const translations: Record<Language, Translations> = {
   },
   
   en: {
+    // Current language
+    language: 'en',
+    
     // Navigation
     home: 'Home',
     animalTest: 'Animal Face Test',
@@ -193,6 +202,9 @@ export const translations: Record<Language, Translations> = {
   },
   
   ja: {
+    // Current language
+    language: 'ja',
+    
     // Navigation
     home: 'ホーム',
     animalTest: '動物顔診断',
@@ -256,6 +268,9 @@ export const translations: Record<Language, Translations> = {
   },
   
   zh: {
+    // Current language
+    language: 'zh',
+    
     // Navigation
     home: '首页',
     animalTest: '动物脸测试',
@@ -319,6 +334,9 @@ export const translations: Record<Language, Translations> = {
   },
   
   id: {
+    // Current language
+    language: 'id',
+    
     // Navigation
     home: 'Beranda',
     animalTest: 'Tes Wajah Hewan',
@@ -382,6 +400,9 @@ export const translations: Record<Language, Translations> = {
   },
   
   th: {
+    // Current language
+    language: 'th',
+    
     // Navigation
     home: 'หน้าแรก',
     animalTest: 'ทดสอบหน้าสัตว์',
@@ -445,6 +466,9 @@ export const translations: Record<Language, Translations> = {
   },
   
   vi: {
+    // Current language
+    language: 'vi',
+    
     // Navigation
     home: 'Trang chủ',
     animalTest: 'Test Mặt Động Vật',

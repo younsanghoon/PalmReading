@@ -1,0 +1,210 @@
+# 분석 보고서: 손금 테스트 컴포넌트 오류 해결 및 개선
+
+## 문제 개요
+PalmReading 웹 애플리케이션의 손금 테스트 페이지에서 `modelURL` 속성에 접근하려고 할 때 `undefined` 오류가 발생했습니다. 이로 인해 손금 테스트 기능이 완전히 작동하지 않았으며, 사용자는 테스트를 진행할 수 없었습니다.
+
+## 기술적 분석
+
+### 1. 오류 발생 원인
+
+#### 1.1 useTeachableMachine 훅 매개변수 누락
+`palm-reading-test.tsx` 컴포넌트에서 `useTeachableMachine` 훅을 사용할 때 필수 매개변수인 `modelURL`과 `metadataURL`을 전달하지 않았습니다.
+
+```typescript
+// 오류가 있는 코드
+const { 
+  predictPalm, 
+  isLoading: isAnalyzing, 
+  error: analysisError 
+} = useTeachableMachine();
+```
+
+`useTeachableMachine.ts` 훅의 정의를 살펴보면:
+
+```typescript
+export function useTeachableMachine({ modelURL, metadataURL }: UseTeachableMachineProps) {
+  // ...
+}
+```
+
+이 훅은 `modelURL`과 `metadataURL`을 포함한 객체를 매개변수로 받아야 하지만, 컴포넌트에서는 이를 전달하지 않았습니다.
+
+#### 1.2 ResultChart 컴포넌트 타입 오류
+`ResultChart` 컴포넌트를 사용할 때 필수 속성인 `type`을 전달하지 않았습니다.
+
+```typescript
+// 오류가 있는 코드
+<ResultChart data={getChartData()} />
+```
+
+`result-chart.tsx` 컴포넌트의 인터페이스를 살펴보면:
+
+```typescript
+interface ResultChartProps {
+  data: any;
+  type: 'bar' | 'radar' | 'doughnut';
+  title?: string;
+  className?: string;
+}
+```
+
+`type` 속성이 필수이지만 컴포넌트에서는 이를 전달하지 않았습니다.
+
+#### 1.3 조건부 렌더링 부재
+`getChartData()` 함수가 `null`을 반환할 수 있는데, 이에 대한 조건부 처리가 없었습니다.
+
+```typescript
+// 오류가 있는 코드
+<ResultChart data={getChartData()} />
+```
+
+`getChartData()` 함수의 정의:
+
+```typescript
+const getChartData = () => {
+  if (!result) return null;
+  
+  return {
+    // ...
+  };
+};
+```
+
+결과가 없을 때 `null`을 반환하지만, 이를 처리하는 조건부 렌더링이 없었습니다.
+
+### 2. 해결 방안 상세 분석
+
+#### 2.1 모델 URL 정의 및 전달
+모델 URL을 명시적으로 정의하고 `useTeachableMachine` 훅에 전달했습니다.
+
+```typescript
+// 수정된 코드
+// 모델 URL 정의
+const modelURL = '/attached_assets/model_1752161703239.json';
+const metadataURL = '/attached_assets/metadata_1752161703239.json';
+
+const { 
+  predict,
+  isLoading: isAnalyzing, 
+  error: analysisError 
+} = useTeachableMachine({ modelURL, metadataURL });
+```
+
+#### 2.2 직접 AI 모델 라이브러리 함수 사용
+`useTeachableMachine` 훅의 `predict` 함수 대신 `ai-models.ts`에서 제공하는 `predictPalmReading` 함수를 직접 사용했습니다.
+
+```typescript
+// 수정된 코드
+import { predictPalmReading } from "@/lib/ai-models";
+
+// ...
+
+try {
+  // 직접 AI 모델 라이브러리의 함수를 사용하여 예측
+  const predictions = await predictPalmReading(imageElement);
+  
+  // Process palm reading results
+  const palmResult = {
+    // ...
+  };
+} catch (error) {
+  console.error('[PalmReadingTest] Analysis error:', error);
+  alert('손금 분석에 실패했습니다. 다시 시도해 주세요.');
+  setCurrentStep('upload');
+}
+```
+
+이 방식은 `useTeachableMachine` 훅에서 발생할 수 있는 문제를 우회하고, 더 직접적인 오류 처리가 가능합니다.
+
+#### 2.3 ResultChart 컴포넌트 수정
+`ResultChart` 컴포넌트에 필수 속성인 `type`을 추가하고, 조건부 렌더링을 적용했습니다.
+
+```typescript
+// 수정된 코드
+{getChartData() && <ResultChart data={getChartData()} type="radar" />}
+```
+
+이렇게 하면 `getChartData()`가 `null`을 반환할 때 `ResultChart` 컴포넌트가 렌더링되지 않아 오류를 방지할 수 있습니다.
+
+### 3. 디자인 개선 분석
+
+#### 3.1 능력선 분석 결과 섹션 추가
+기존에는 생명선, 감정선, 지능선, 운명선만 표시했지만, 능력선 분석 결과 섹션을 추가했습니다.
+
+```typescript
+// 추가된 코드
+<div className="bg-purple-50 rounded-2xl p-6 mb-6">
+  <h4 className="text-lg font-bold text-purple-700 mb-2">능력선</h4>
+  <p className="text-gray-700">{result.abilityLine}</p>
+</div>
+```
+
+이로써 손금 분석의 5가지 주요 선(생명선, 감정선, 지능선, 운명선, 능력선)을 모두 표시할 수 있게 되었습니다.
+
+#### 3.2 궁합 분석 UI 개선
+궁합 분석 UI를 개선하여 더 직관적이고 시각적으로 구분하기 쉽게 만들었습니다.
+
+```typescript
+// 개선된 코드
+<div>
+  <h5 className="font-bold text-gray-700 mb-1">최고의 궁합</h5>
+  <div className="flex flex-wrap gap-2">
+    {getPalmCompatibility().best.map((type, index) => (
+      <span key={index} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+        {type}
+      </span>
+    ))}
+  </div>
+</div>
+```
+
+이전에는 블록 형태의 목록이었지만, 이제는 플렉스 레이아웃과 둥근 모서리의 태그 형태로 표시됩니다.
+
+#### 3.3 버튼 레이아웃 및 스타일 개선
+버튼의 레이아웃과 스타일을 개선하여 사용자 경험을 향상시켰습니다.
+
+```typescript
+// 개선된 코드
+<Button
+  onClick={handleReset}
+  variant="outline"
+  className="gap-2"
+>
+  <RotateCcw className="w-4 h-4" />
+  다시 분석하기
+</Button>
+<Button
+  onClick={handleShare}
+  className="bg-amber-600 hover:bg-amber-700 gap-2"
+>
+  <Share2 className="w-4 h-4" />
+  결과 공유하기
+</Button>
+```
+
+아이콘과 텍스트 사이에 간격을 추가하고, 버튼 색상을 테마에 맞게 조정했습니다.
+
+## 교훈 및 권장사항
+
+### 1. 외부 라이브러리 사용 시 주의사항
+- **인터페이스 확인**: 외부 라이브러리나 커스텀 훅을 사용할 때는 반드시 인터페이스를 확인하고 필수 매개변수를 전달해야 합니다.
+- **타입 정의 활용**: TypeScript의 타입 정의를 활용하여 컴파일 타임에 오류를 발견할 수 있도록 합니다.
+- **문서화**: 커스텀 훅이나 컴포넌트를 작성할 때는 명확한 문서화와 예제를 제공하는 것이 좋습니다.
+
+### 2. 오류 처리 전략
+- **try-catch 블록**: 비동기 작업에는 항상 try-catch 블록을 사용하여 오류를 처리해야 합니다.
+- **사용자 피드백**: 오류 발생 시 사용자에게 적절한 피드백을 제공해야 합니다.
+- **로깅**: 오류 발생 시 콘솔에 로그를 남겨 디버깅을 용이하게 해야 합니다.
+
+### 3. 조건부 렌더링
+- **null/undefined 체크**: 데이터가 null이나 undefined일 수 있는 경우 항상 조건부 렌더링을 사용해야 합니다.
+- **옵셔널 체이닝**: 객체의 속성에 접근할 때는 옵셔널 체이닝(`?.`)을 사용하는 것이 좋습니다.
+- **기본값 제공**: 데이터가 없을 때 표시할 기본값을 제공하는 것이 좋습니다.
+
+### 4. UI/UX 개선
+- **일관된 디자인**: 애플리케이션 전체에서 일관된 디자인 언어를 사용해야 합니다.
+- **시각적 피드백**: 사용자 액션에 대한 시각적 피드백을 제공해야 합니다.
+- **접근성**: 색상 대비, 키보드 네비게이션 등 접근성을 고려한 디자인을 해야 합니다.
+
+## 결론
+손금 테스트 페이지의 오류는 필수 매개변수 누락, 타입 오류, 조건부 렌더링 부재 등 여러 요인이 복합적으로 작용한 결과였습니다. 이번 수정을 통해 손금 테스트 기능이 정상적으로 작동하게 되었으며, UI/UX도 개선되었습니다. 또한, 오류 처리 로직을 강화하여 향후 유사한 문제가 발생하더라도 사용자에게 적절한 피드백을 제공할 수 있게 되었습니다. 

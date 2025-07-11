@@ -1,0 +1,70 @@
+# 작업 내역: AI 모델 로드 오류 추가 해결
+
+## 문제 상황
+- 이전 수정에도 불구하고 여전히 모델 로드 오류가 발생
+- 로그 분석 결과, `/attached_assets/weights.bin` 파일도 HTML 페이지로 잘못 반환되고 있음
+- Express의 정적 파일 제공 미들웨어가 SPA 라우트 처리 미들웨어보다 늦게 실행되는 문제
+
+## 분석 내용
+1. 서버 로그 분석
+   ```
+   1:07:47 AM [debug-router] Request received: GET /attached_assets/weights.bin
+   1:07:47 AM [debug-router] User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36
+   1:07:47 AM [debug-router] Referer: http://localhost:5000/palm-test
+   1:07:47 AM [spa-router] Handling SPA route: /attached_assets/weights.bin
+   1:07:47 AM [vite-template] Loading template from: C:\Users\82103\Desktop\PalmReading\PalmReading\client\index.html
+   1:07:47 AM [vite-transform] Transforming index.html for URL: /attached_assets/weights.bin
+   1:07:47 AM [vite-response] Sending transformed HTML response for: /attached_assets/weights.bin
+   ```
+
+2. 코드 분석
+   - 정적 파일 제공 미들웨어가 SPA 라우트 처리 미들웨어보다 늦게 실행되는 문제 확인
+   - 정적 파일 요청이 SPA 라우트로 잘못 처리되고 있음
+   - Content-Type 헤더가 적절하게 설정되지 않는 문제
+
+## 해결 방법
+1. 미들웨어 순서 변경
+   - 정적 파일 제공 미들웨어를 SPA 라우트 처리 미들웨어보다 먼저 실행되도록 순서 변경
+   - Vite 미들웨어 설정 전에 정적 파일 제공 미들웨어 추가
+
+2. 정적 파일 요청 처리 개선
+   - `/attached_assets/` 경로 요청을 SPA 라우트 처리에서 제외하도록 조건 추가
+   - 모든 catch-all 라우트에서도 정적 파일 요청 제외 처리
+
+3. Content-Type 헤더 설정 추가
+   - JSON 파일에 대해 `application/json` Content-Type 설정
+   - bin 파일에 대해 `application/octet-stream` Content-Type 설정
+
+## 테스트 결과
+1. `curl` 명령어로 모델 파일 요청 테스트
+   ```
+   HTTP/1.1 200 OK
+   X-Powered-By: Express
+   Vary: Origin
+   Accept-Ranges: bytes
+   Cache-Control: public, max-age=0
+   Last-Modified: Thu, 10 Jul 2025 15:40:24 GMT
+   ETag: W/"166a8-197f4feba40"
+   Content-Type: application/json; charset=UTF-8
+   Content-Length: 91816
+   ```
+
+2. weights 파일 요청 테스트
+   ```
+   HTTP/1.1 200 OK
+   X-Powered-By: Express
+   Vary: Origin
+   Accept-Ranges: bytes
+   Cache-Control: public, max-age=0
+   Last-Modified: Thu, 10 Jul 2025 15:40:26 GMT
+   ETag: W/"20e470-197f4fec210"
+   Content-Type: application/octet-stream
+   Content-Length: 2155632
+   ```
+
+3. 적절한 Content-Type 헤더가 설정되어 정상적으로 파일이 제공됨
+
+## 향후 개선 사항
+- 정적 파일 캐싱 전략 구현
+- 정적 파일 제공 성능 최적화
+- 모델 파일 로드 상태에 대한 UI 피드백 개선 

@@ -1,0 +1,57 @@
+# AI 모델 로딩 오류 분석 및 해결
+
+## 문제 개요
+PalmReading 애플리케이션의 `/animal-test`와 `/palm-test` 페이지에서 AI 모델 로딩 시 오류가 발생했습니다. 이로 인해 사용자가 이미지를 업로드한 후 분석을 시작할 때 모델이 제대로 로드되지 않아 테스트가 진행되지 않았습니다.
+
+## 기술적 분석
+
+### 1. 파일 경로 문제
+- 모델 파일들(`model_1752161703239.json`, `metadata_1752161703239.json`, `weights_1752161703239.bin`)이 프로젝트 루트의 `attached_assets` 디렉토리에 위치
+- 클라이언트 코드에서는 `/attached_assets/...` 경로로 이 파일들을 요청
+- 하지만 웹 서버는 `client/public` 디렉토리를 정적 파일 루트로 사용하기 때문에 이 경로의 파일들을 찾지 못함
+
+### 2. 관련 코드 분석
+```typescript
+// client/src/components/personality-tests/animal-face-test.tsx
+const modelURL = '/attached_assets/model_1752161703239.json';
+const metadataURL = '/attached_assets/metadata_1752161703239.json';
+```
+
+```typescript
+// client/src/lib/ai-models.ts
+const modelURL = '/attached_assets/model_1752161703239.json';
+const metadataURL = '/attached_assets/metadata_1752161703239.json';
+const model = await loadModel(modelURL, metadataURL);
+```
+
+### 3. 서버 로그 분석
+서버 로그에서 다음과 같은 요청이 발생했으나 파일을 찾지 못했습니다:
+```
+[debug-router] Request received: GET /attached_assets/model_1752161703239.json
+[debug-router] Request received: GET /attached_assets/weights_1752161703239.bin
+```
+
+## 해결 방법
+
+### 1. 정적 파일 경로 수정
+모델 파일들을 클라이언트에서 접근할 수 있도록 `client/public` 디렉토리에 복사했습니다:
+1. `client/public/attached_assets` 디렉토리 생성
+2. 모델 파일들을 이 디렉토리로 복사
+3. 추가로 `client/public` 디렉토리에도 직접 복사하여 중복 경로 문제 해결
+
+### 2. 파일 구조 개선 제안
+향후 유지보수를 위한 개선 제안:
+- 모든 모델 파일을 `client/public/models` 디렉토리에 체계적으로 관리
+- 각 모델 유형별로 서브디렉토리 생성 (예: `models/animal`, `models/palm`)
+- 코드에서 모델 경로를 상수로 관리하여 중앙화
+
+## 교훈 및 시사점
+1. 웹 애플리케이션에서 정적 파일 서빙 경로와 실제 파일 시스템 경로의 차이를 명확히 이해해야 함
+2. 모델 파일과 같은 대용량 자산은 적절한 디렉토리 구조로 관리해야 함
+3. 개발 환경과 프로덕션 환경에서 파일 경로가 일관되게 작동하는지 확인 필요
+
+## 관련 파일 및 모듈
+- `client/src/components/personality-tests/animal-face-test.tsx`
+- `client/src/components/personality-tests/palm-reading-test.tsx`
+- `client/src/lib/ai-models.ts`
+- `client/src/hooks/use-teachable-machine.ts` 

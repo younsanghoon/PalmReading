@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdSpace } from "@/components/ui/ad-space";
@@ -7,6 +7,7 @@ import { AnimalFaceTest } from "@/components/personality-tests/animal-face-test"
 
 export default function AnimalTestPage() {
   const [isTestOpen, setIsTestOpen] = useState(false);
+  const [_, navigate] = useLocation();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
@@ -19,12 +20,14 @@ export default function AnimalTestPage() {
         <div className="max-w-4xl mx-auto">
           {/* Navigation */}
           <div className="flex items-center gap-4 mb-8">
-            <Link href="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                홈으로
-              </Button>
-            </Link>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => navigate("/")}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              홈으로
+            </Button>
           </div>
 
           {/* Main Content */}
