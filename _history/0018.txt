@@ -1,0 +1,43 @@
+# 작업 기록 - GitHub Pages 빌드 오류 수정
+
+## 날짜: 2023년 5월 30일
+
+## 수행한 작업
+1. GitHub Actions 빌드 오류 분석
+   - 오류 메시지: `[vite:build-html] URI malformed`
+   - 원인: `%PUBLIC_URL%` 변수가 Vite에서 지원되지 않음
+   - client/index.html 파일에서 경로 문제 발견
+
+2. client/index.html 파일 수정
+   - `%PUBLIC_URL%/manifest.json` → `/manifest.json`
+   - `%PUBLIC_URL%/icon-192.png` → `/icon-192.png`
+   - Vite에서 사용할 수 있는 형식으로 경로 변경
+
+3. package.json 파일 수정
+   - 프로젝트 이름: "rest-express" → "palm-reading-app"
+   - 빌드 스크립트 수정: 서버 빌드 부분 제거
+   - GitHub Pages 배포 스크립트 추가
+
+4. 변경사항 커밋 및 푸시
+   - "Fix build errors for GitHub Pages deployment" 메시지로 커밋
+   - GitHub 원격 저장소에 푸시
+
+## 주요 변경 사항
+1. 빌드 스크립트 변경
+   - 변경 전: `"build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist"`
+   - 변경 후: `"build": "vite build"`
+   - 정적 웹 호스팅을 위해 클라이언트 빌드만 수행하도록 변경
+
+2. 경로 설정 수정
+   - Create React App에서 사용하는 `%PUBLIC_URL%` 변수 제거
+   - Vite 호환 경로 형식으로 변경
+
+3. 배포 스크립트 추가
+   - `"predeploy": "npm run build"`
+   - `"deploy": "gh-pages -d dist/public"`
+
+## 다음 단계
+1. GitHub Actions 워크플로우 재실행 확인
+2. 배포된 웹사이트 접속 테스트
+3. 경로 설정이 올바르게 적용되었는지 확인
+4. PWA 기능 테스트 
