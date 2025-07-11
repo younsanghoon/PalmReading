@@ -1,27 +1,39 @@
 {
-  "name": "성격 분석 테스트 센터",
-  "short_name": "성격테스트",
-  "description": "AI와 심리학으로 알아보는 나의 진짜 성격",
+  "name": "손금 테스트 - AI 손금 분석",
+  "short_name": "손금 테스트",
+  "description": "손금 분석과 AI 동물상 테스트로 나의 성격과 운세를 알아보세요",
   "start_url": "/PalmReading/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#667eea",
-  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/PalmReading/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any maskable"
     },
     {
-      "src": "/PalmReading/icon-512.png", 
+      "src": "/PalmReading/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any maskable"
     }
   ],
-  "categories": ["lifestyle", "education", "entertainment"],
-  "lang": "ko",
-  "dir": "ltr"
+  "shortcuts": [
+    {
+      "name": "손금 테스트",
+      "short_name": "손금",
+      "description": "AI로 손금을 분석해보세요",
+      "url": "/PalmReading/palm-test",
+      "icons": [{ "src": "/PalmReading/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "동물상 테스트",
+      "short_name": "동물상",
+      "description": "AI로 나의 동물상을 알아보세요",
+      "url": "/PalmReading/animal-test",
+      "icons": [{ "src": "/PalmReading/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
 }
