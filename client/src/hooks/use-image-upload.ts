@@ -8,6 +8,7 @@ interface UseImageUploadReturn {
   uploadImage: (file: File) => Promise<void>;
   clearImage: () => void;
   createImageElement: () => Promise<HTMLImageElement | null>;
+  setImageUrl: (url: string) => void;
 }
 
 export function useImageUpload(): UseImageUploadReturn {
@@ -70,6 +71,12 @@ export function useImageUpload(): UseImageUploadReturn {
     });
   }, [imageUrl]);
 
+  // 이미지 URL을 직접 설정하는 함수 추가
+  const setImageUrlDirectly = useCallback((url: string) => {
+    setImageUrl(url);
+    setImageFile(null); // 직접 URL을 설정할 때는 파일 객체가 없음
+  }, []);
+
   return {
     imageFile,
     imageUrl,
@@ -77,6 +84,7 @@ export function useImageUpload(): UseImageUploadReturn {
     error,
     uploadImage,
     clearImage,
-    createImageElement
+    createImageElement,
+    setImageUrl: setImageUrlDirectly
   };
 }

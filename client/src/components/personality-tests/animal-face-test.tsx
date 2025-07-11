@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -15,23 +15,108 @@ interface AnimalFaceTestProps {
 }
 
 export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
-  const [currentStep, setCurrentStep] = useState<'upload' | 'analyzing' | 'result'>('upload');
+  const [currentStep, setCurrentStep] = useState<'upload' | 'camera' | 'analyzing' | 'result'>('upload');
   const [result, setResult] = useState<any>(null);
+  const [modelLoaded, setModelLoaded] = useState(false);
+  
+  // 카메라 관련 상태 및 참조
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const photoRef = useRef<HTMLImageElement>(null);
+  const cameraInstanceRef = useRef<any>(null);
   
   const { 
     imageUrl, 
     uploadImage, 
     clearImage, 
     createImageElement,
+    setImageUrl,
     isUploading,
     error: uploadError 
   } = useImageUpload();
   
+  // 모델 URL 정의
+  const modelURL = '/attached_assets/model.json';
+  const metadataURL = '/attached_assets/metadata.json';
+  
   const { 
-    predictAnimal, 
+    model,
+    predictAnimal,
     isLoading: isAnalyzing, 
     error: analysisError 
-  } = useTeachableMachine();
+  } = useTeachableMachine({ modelURL, metadataURL });
+
+  // 모델 로드 상태 체크
+  useEffect(() => {
+    if (model) {
+      console.log('[AnimalFaceTest] Model loaded successfully');
+      setModelLoaded(true);
+    }
+  }, [model]);
+
+  // 카메라 스크립트 로드
+  useEffect(() => {
+    // 스크립트가 이미 로드되었는지 확인
+    if (!document.getElementById('camera-capture-script')) {
+      // CSS 로드
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = '/camera-capture.css';
+      document.head.appendChild(link);
+      
+      // JS 로드
+      const script = document.createElement('script');
+      script.id = 'camera-capture-script';
+      script.src = '/camera-capture.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+    
+    // 컴포넌트 언마운트 시 리소스 정리
+    return () => {
+      if (cameraInstanceRef.current) {
+        cameraInstanceRef.current.dispose();
+        cameraInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  // 카메라 초기화
+  const initCamera = () => {
+    setCurrentStep('camera');
+    
+    // 다음 렌더링 사이클에서 카메라 초기화
+    setTimeout(() => {
+      if (!window.CameraCapture) {
+        console.error('카메라 스크립트가 로드되지 않았습니다.');
+        return;
+      }
+      
+      if (cameraInstanceRef.current) {
+        cameraInstanceRef.current.dispose();
+      }
+      
+      cameraInstanceRef.current = new window.CameraCapture({
+        videoElement: videoRef.current,
+        canvasElement: canvasRef.current,
+        photoElement: photoRef.current,
+        startButton: document.getElementById('startCameraButton'),
+        captureButton: document.getElementById('captureCameraButton'),
+        switchButton: document.getElementById('switchCameraButton'),
+        cameraSelect: document.getElementById('cameraSelect'),
+        onPhotoCapture: (dataUrl: string) => {
+          setImageUrl(dataUrl);
+          // 카메라 모드 종료 후 분석 단계로 이동
+          setTimeout(() => {
+            setCurrentStep('upload');
+          }, 500);
+        }
+      });
+      
+      cameraInstanceRef.current.initialize();
+      cameraInstanceRef.current.startCamera();
+    }, 100);
+  };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -46,35 +131,43 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
 
     setCurrentStep('analyzing');
     
-    const predictions = await predictAnimal(imageElement);
-    if (predictions) {
-      // Find the highest probability result
-      const topPrediction = predictions.reduce((max, pred) => 
-        pred.probability > max.probability ? pred : max
-      );
-      
-      const animalType = topPrediction.className;
-      const personality = ANIMAL_PERSONALITIES[animalType as keyof typeof ANIMAL_PERSONALITIES];
-      
-      setResult({
-        animalType,
-        confidence: topPrediction.probability * 100,
-        predictions,
-        ...personality
-      });
-      
-      // Save to localStorage
-      const results = JSON.parse(localStorage.getItem('personalityResults') || '{}');
-      results.animal = {
-        result: animalType,
-        confidence: topPrediction.probability * 100,
-        timestamp: new Date().toISOString()
-      };
-      localStorage.setItem('personalityResults', JSON.stringify(results));
-      
-      setCurrentStep('result');
-    } else {
+    try {
+      const predictions = await predictAnimal(imageElement);
+      if (predictions && predictions.length > 0) {
+        // Find the highest probability result
+        const topPrediction = predictions.reduce((max, pred) => 
+          pred.probability > max.probability ? pred : max
+        );
+        
+        const animalType = topPrediction.className;
+        const personality = ANIMAL_PERSONALITIES[animalType as keyof typeof ANIMAL_PERSONALITIES];
+        
+        setResult({
+          animalType,
+          confidence: topPrediction.probability * 100,
+          predictions,
+          ...personality
+        });
+        
+        // Save to localStorage
+        const results = JSON.parse(localStorage.getItem('personalityResults') || '{}');
+        results.animal = {
+          result: animalType,
+          confidence: topPrediction.probability * 100,
+          timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('personalityResults', JSON.stringify(results));
+        
+        setCurrentStep('result');
+      } else {
+        setCurrentStep('upload');
+        console.error('[AnimalFaceTest] No predictions returned');
+        alert('분석에 실패했습니다. 다른 사진으로 다시 시도해 주세요.');
+      }
+    } catch (error) {
+      console.error('[AnimalFaceTest] Analysis error:', error);
       setCurrentStep('upload');
+      alert('분석 중 오류가 발생했습니다. 다시 시도해 주세요.');
     }
   };
 
@@ -82,6 +175,12 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
     setCurrentStep('upload');
     setResult(null);
     clearImage();
+    
+    // 카메라 인스턴스 정리
+    if (cameraInstanceRef.current) {
+      cameraInstanceRef.current.dispose();
+      cameraInstanceRef.current = null;
+    }
   };
 
   const handleShare = async () => {
@@ -197,7 +296,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => alert('웹캠 기능은 준비 중입니다.')}
+                onClick={initCamera}
               >
                 <Camera className="w-4 h-4 mr-2" />
                 사진 촬영
@@ -222,138 +321,149 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                 <Button
                   onClick={handleAnalyze}
                   className="mt-4 bg-primary hover:bg-primary/90"
-                  disabled={isAnalyzing}
+                  disabled={isAnalyzing || !modelLoaded}
                 >
                   {isAnalyzing ? (
                     <>
-                      <LoadingSpinner className="w-4 h-4 mr-2" />
+                      <LoadingSpinner className="mr-2" />
                       분석 중...
                     </>
+                  ) : !modelLoaded ? (
+                    <>
+                      <LoadingSpinner className="mr-2" />
+                      모델 로딩 중...
+                    </>
                   ) : (
-                    '분석 시작하기'
+                    "분석 시작하기"
                   )}
                 </Button>
+                {!modelLoaded && (
+                  <p className="text-sm text-gray-500 mt-2">AI 모델을 로드하는 중입니다. 잠시만 기다려주세요.</p>
+                )}
               </div>
             )}
 
-            {(uploadError || analysisError) && (
-              <div className="text-center text-red-600 bg-red-50 p-4 rounded-lg">
-                {uploadError || analysisError}
+            {uploadError && (
+              <div className="text-center text-red-500">
+                {uploadError}
               </div>
             )}
           </div>
         )}
 
+        {currentStep === 'camera' && (
+          <div className="camera-container">
+            <div className="camera-preview">
+              <video ref={videoRef} className="camera-video" autoPlay playsInline></video>
+              <canvas ref={canvasRef} className="camera-canvas"></canvas>
+            </div>
+            
+            <img ref={photoRef} className="camera-photo" alt="촬영된 사진" />
+            
+            <select id="cameraSelect" className="camera-select mt-4"></select>
+            
+            <div className="camera-controls">
+              <button id="startCameraButton" className="camera-button">카메라 시작</button>
+              <button id="captureCameraButton" className="camera-button capture">사진 촬영</button>
+              <button id="switchCameraButton" className="camera-button switch">카메라 전환</button>
+              <Button onClick={() => setCurrentStep('upload')} variant="outline">
+                뒤로 가기
+              </Button>
+            </div>
+          </div>
+        )}
+
         {currentStep === 'analyzing' && (
           <div className="text-center py-12">
-            <LoadingSpinner className="w-16 h-16 text-purple-600 mx-auto mb-4" />
+            <LoadingSpinner size="large" className="mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              AI가 분석 중입니다...
+              AI가 당신의 동물상을 분석하고 있습니다
             </h3>
-            <p className="text-gray-600">잠시만 기다려 주세요.</p>
+            <p className="text-gray-600">
+              잠시만 기다려주세요...
+            </p>
           </div>
         )}
 
         {currentStep === 'result' && result && (
           <div className="space-y-8">
             <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl">🐾</span>
-              </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                당신의 동물상은...
+                당신의 동물상은 <span className="text-purple-600">{result.animalType}</span>입니다!
               </h3>
-              <div className="bg-purple-50 rounded-2xl p-6 mb-6">
-                <h4 className="text-3xl font-bold text-purple-600 mb-2">
-                  {result.animalType}
-                </h4>
-                <p className="text-lg text-gray-700 mb-4">
-                  {result.description}
-                </p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {result.traits.map((trait: string, index: number) => (
-                    <span
-                      key={index}
-                      className="bg-purple-200 text-purple-800 px-3 py-1 rounded-full text-sm"
-                    >
-                      {trait}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              <p className="text-gray-600">
+                정확도: {result.confidence.toFixed(1)}%
+              </p>
             </div>
 
-            {getChartData() && (
-              <div className="mb-6">
-                <ResultChart
-                  data={getChartData()}
-                  type="bar"
-                  title="동물상 확률 분석"
-                  className="h-64"
-                />
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>분석 결과</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-4">
+                      <img
+                        src={imageUrl}
+                        alt="Uploaded"
+                        className="max-w-full rounded-lg shadow-sm mx-auto"
+                      />
+                    </div>
+                    <ResultChart data={getChartData()} />
+                  </CardContent>
+                </Card>
               </div>
-            )}
 
-            {/* 궁합 분석 */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  궁합 분석
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {(() => {
-                  const compatibility = getAnimalCompatibility(result.animalType);
-                  return (
+              <div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{result.animalType}의 특징</CardTitle>
+                  </CardHeader>
+                  <CardContent>
                     <div className="space-y-4">
-                      <p className="text-gray-700 dark:text-gray-300">
-                        {compatibility.description}
-                      </p>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <h4 className="font-semibold text-green-600 mb-2">최고 궁합</h4>
-                          <div className="space-y-1">
-                            {compatibility.best.map((type, index) => (
-                              <span key={index} className="block px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded text-sm">
-                                {type}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h4 className="font-semibold text-blue-600 mb-2">좋은 궁합</h4>
-                          <div className="space-y-1">
-                            {compatibility.good.map((type, index) => (
-                              <span key={index} className="block px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded text-sm">
-                                {type}
-                              </span>
-                            ))}
-                          </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900">성격</h4>
+                        <p className="text-gray-600">{result.personality}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900">매력 포인트</h4>
+                        <p className="text-gray-600">{result.charm}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900">연애 스타일</h4>
+                        <p className="text-gray-600">{result.dating}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900">잘 맞는 유형</h4>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {getAnimalCompatibility(result.animalType).best.map((type, i) => (
+                            <span key={i} className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                              {type}
+                            </span>
+                          ))}
                         </div>
                       </div>
                     </div>
-                  );
-                })()}
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
 
             <div className="flex justify-center space-x-4">
               <Button
                 onClick={handleShare}
-                className="bg-secondary hover:bg-secondary/90"
+                variant="outline"
               >
                 <Share2 className="w-4 h-4 mr-2" />
                 결과 공유하기
               </Button>
               <Button
-                variant="outline"
                 onClick={handleReset}
+                variant="outline"
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
-                다시 테스트
+                다시 시도하기
               </Button>
             </div>
           </div>
