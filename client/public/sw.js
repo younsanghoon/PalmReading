@@ -1,9 +1,13 @@
 const CACHE_NAME = 'personality-test-v1';
 const urlsToCache = [
-  '/',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
-  '/manifest.json'
+  '/PalmReading/',
+  '/PalmReading/index.html',
+  '/PalmReading/static/js/bundle.js',
+  '/PalmReading/static/css/main.css',
+  '/PalmReading/manifest.json',
+  '/PalmReading/icon-192.png',
+  '/PalmReading/icon-512.png',
+  '/PalmReading/offline.html'
 ];
 
 self.addEventListener('install', function(event) {
@@ -23,8 +27,13 @@ self.addEventListener('fetch', function(event) {
         if (response) {
           return response;
         }
-        return fetch(event.request);
-      }
-    )
+        return fetch(event.request)
+          .catch(function() {
+            // 오프라인이고 페이지 요청인 경우 오프라인 페이지 제공
+            if (event.request.mode === 'navigate') {
+              return caches.match('/PalmReading/offline.html');
+            }
+          });
+      })
   );
 });
