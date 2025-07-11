@@ -1,7 +1,7 @@
 {
-  "name": "성격 분석 테스트 센터",
-  "short_name": "성격테스트",
-  "description": "AI와 심리학으로 알아보는 나의 진짜 성격",
+  "name": "손금 테스트",
+  "short_name": "손금테스트",
+  "description": "AI로 알아보는 나의 운명 - 손금으로 보는 미래",
   "start_url": "/PalmReading/",
   "display": "standalone",
   "background_color": "#ffffff",

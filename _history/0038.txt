@@ -1,0 +1,27 @@
+# GitHub Pages 배포 문제 추가 해결 시도
+
+## 현재 상황
+- GitHub Pages 배포가 완료되었으나 여전히 "성격 분석 테스트" 앱이 표시됨
+- 올바른 앱인 "손금 테스트"가 표시되지 않음
+
+## 문제 분석
+1. CNAME 파일 확인 결과: `younsanghoon.github.io/PalmReading` 값이 설정됨 (올바른 형식이 아님)
+2. gh-pages 브랜치에 이전 프로젝트("성격 분석 테스트") 파일들이 남아 있음
+3. 메타데이터 및 앱 정보가 여전히 "성격 분석 테스트"로 설정되어 있음
+
+## 해결 방안
+1. CNAME 파일 수정 또는 삭제 필요 (GitHub Pages에서는 서브디렉토리 형식으로 CNAME을 설정할 수 없음)
+2. GitHub 저장소 설정에서 배포 소스를 GitHub Actions로 변경 권장
+3. 메인 브랜치에서 빌드 및 배포 워크플로우가 올바르게 실행되도록 설정
+
+## 다음 단계
+1. GitHub 저장소 설정에서:
+   - Settings > Pages > Build and deployment > Source를 "GitHub Actions"로 변경
+   - Deploy from a branch 옵션 대신 GitHub Actions 워크플로우 사용
+2. CNAME 파일 삭제 또는 올바른 형식으로 수정
+3. 필요시 gh-pages 브랜치를 정리하거나 새로 생성
+
+## 참고 사항
+- GitHub Pages는 두 가지 유형이 있음: 사용자/조직 사이트와 프로젝트 사이트
+- 프로젝트 사이트는 기본적으로 `username.github.io/repository-name` 형식의 URL을 가짐
+- 현재는 프로젝트 사이트로 배포되어야 함 (younsanghoon.github.io/PalmReading) 

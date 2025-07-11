@@ -7,10 +7,10 @@ function App() {
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            성격 분석 테스트
+            손금 테스트
           </h1>
           <p className="text-lg text-gray-600 mb-8">
-            애플리케이션이 로드되었습니다.
+            손금으로 보는 나의 운명
           </p>
           
           {/* Google AdSense 광고 */}
