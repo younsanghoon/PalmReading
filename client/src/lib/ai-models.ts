@@ -210,11 +210,26 @@ export async function predictAnimalFace(imageElement: HTMLImageElement): Promise
     const metadataURL = window.location.origin + '/PalmReading/attached_assets/metadata_1752161703239.json';
     console.log('[AI-Models] Using animal model URLs:', { modelURL, metadataURL });
     
-    const model = await loadModel(modelURL, metadataURL);
+    let model;
+    try {
+      model = await loadModel(modelURL, metadataURL);
+      console.log('[AI-Models] Model loaded successfully');
+    } catch (modelError) {
+      console.error('[AI-Models] Failed to load model:', modelError);
+      throw new Error(`Model loading failed: ${(modelError as Error).message}`);
+    }
 
     // 예측 실행
-    console.log('[AI-Models] Running animal face prediction');
-    const predictions = await model.predict(imageElement);
+    console.log('[AI-Models] Running animal face prediction on image:', imageElement.src.substring(0, 50) + '...');
+    
+    let predictions;
+    try {
+      predictions = await model.predict(imageElement);
+      console.log('[AI-Models] Raw prediction results:', predictions);
+    } catch (predictError) {
+      console.error('[AI-Models] Prediction failed:', predictError);
+      throw new Error(`Prediction failed: ${(predictError as Error).message}`);
+    }
     
     // 결과 변환 및 확인
     if (!predictions || !Array.isArray(predictions) || predictions.length === 0) {
@@ -235,7 +250,7 @@ export async function predictAnimalFace(imageElement: HTMLImageElement): Promise
     });
     
     // 결과 로깅
-    console.log('[AI-Models] Animal face prediction results:', results);
+    console.log('[AI-Models] Animal face prediction results:', JSON.stringify(results));
     
     // 유효한 결과가 있는지 확인
     const validResults = results.filter(r => r.probability > 0);
@@ -244,16 +259,38 @@ export async function predictAnimalFace(imageElement: HTMLImageElement): Promise
       throw new Error('No valid predictions');
     }
     
-    return validResults;
+    // 결과를 확률 내림차순으로 정렬
+    const sortedResults = [...validResults].sort((a, b) => b.probability - a.probability);
+    console.log('[AI-Models] Sorted prediction results:', JSON.stringify(sortedResults));
+    
+    return sortedResults;
   } catch (error) {
     console.error('[AI-Models] Error during animal face prediction:', error);
     
     // 오류 발생 시 대체 결과 생성
     console.warn('[AI-Models] Generating fallback animal face prediction');
-    const imageHash = await generateSimpleHash(imageElement.src);
-    const fallbackResults = generateFallbackPredictions(imageHash, 'animal');
     
-    return fallbackResults;
+    try {
+      const imageHash = await generateSimpleHash(imageElement.src);
+      console.log('[AI-Models] Generated image hash:', imageHash);
+      
+      const fallbackResults = generateFallbackPredictions(imageHash, 'animal');
+      console.log('[AI-Models] Generated fallback results:', JSON.stringify(fallbackResults));
+      
+      return fallbackResults;
+    } catch (fallbackError) {
+      console.error('[AI-Models] Failed to generate fallback results:', fallbackError);
+      
+      // 최후의 수단으로 하드코딩된 결과 반환
+      console.warn('[AI-Models] Returning hardcoded fallback results');
+      return [
+        { className: 'dog', probability: 0.3 },
+        { className: 'cat', probability: 0.25 },
+        { className: 'bear', probability: 0.2 },
+        { className: 'rabbit', probability: 0.15 },
+        { className: 'fox', probability: 0.1 }
+      ];
+    }
   }
 }
 

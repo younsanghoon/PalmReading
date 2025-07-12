@@ -196,6 +196,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
       // 동물상 예측
       if (imageElement) {
         const predictions = await predictAnimal(imageElement);
+        console.log('[AnimalFaceTest] All predictions:', predictions);
         
         if (predictions && predictions.length > 0) {
           // 가장 높은 확률의 예측 찾기
@@ -214,6 +215,42 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
           
           if (!animalInfo) {
             console.error(`[AnimalFaceTest] No data found for animal type: ${koreanAnimalType}`);
+            console.error(`[AnimalFaceTest] Available types: ${Object.keys(ANIMAL_PERSONALITIES).join(', ')}`);
+            
+            // 대체 동물상 사용 (가장 높은 확률의 유효한 동물상)
+            const validPredictions = predictions.filter(p => {
+              const koreanType = getAnimalTypeInKorean(p.className);
+              return ANIMAL_PERSONALITIES[koreanType as keyof typeof ANIMAL_PERSONALITIES] !== undefined;
+            });
+            
+            console.log('[AnimalFaceTest] Valid predictions:', validPredictions);
+            
+            if (validPredictions.length > 0) {
+              // 유효한 예측 중 가장 높은 확률의 예측 사용
+              const validTopPrediction = validPredictions[0];
+              const validAnimalType = validTopPrediction.className;
+              const validKoreanType = getAnimalTypeInKorean(validAnimalType);
+              
+              console.log(`[AnimalFaceTest] Using alternative valid prediction: ${validAnimalType} (${validKoreanType})`);
+              
+              // 결과 설정 업데이트
+              const validAnimalInfo = ANIMAL_PERSONALITIES[validKoreanType as keyof typeof ANIMAL_PERSONALITIES];
+              
+              if (validAnimalInfo) {
+                setResult({
+                  animalType: validAnimalType,
+                  confidence: validTopPrediction.probability * 100,
+                  personality: getAnimalInfo(validAnimalType, 'personality'),
+                  charm: getAnimalInfo(validAnimalType, 'charm'),
+                  dating: getAnimalInfo(validAnimalType, 'dating'),
+                  traits: validAnimalInfo.traits,
+                  predictions
+                });
+                
+                setCurrentStep('result');
+                return;
+              }
+            }
           }
           
           // 기본 정보 설정
@@ -254,10 +291,13 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
           });
           
           setCurrentStep('result');
+        } else {
+          console.error('[AnimalFaceTest] No predictions returned');
+          setCurrentStep('upload');
         }
       }
     } catch (error) {
-      console.error('Analysis error:', error);
+      console.error('[AnimalFaceTest] Analysis error:', error);
       setCurrentStep('upload');
     }
   };
