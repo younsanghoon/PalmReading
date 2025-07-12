@@ -10,6 +10,14 @@ const urlsToCache = [
   '/PalmReading/offline.html'
 ];
 
+// AdSense 관련 URL 패턴
+const adsenseUrls = [
+  'pagead2.googlesyndication.com',
+  'googleads.g.doubleclick.net',
+  'tpc.googlesyndication.com',
+  'www.googletagservices.com'
+];
+
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -20,6 +28,13 @@ self.addEventListener('install', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
+  // AdSense 관련 요청은 네트워크로 직접 전달
+  const url = new URL(event.request.url);
+  if (adsenseUrls.some(adsUrl => url.hostname.includes(adsUrl))) {
+    console.log('[SW] Bypassing AdSense request:', url.hostname);
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(function(response) {
