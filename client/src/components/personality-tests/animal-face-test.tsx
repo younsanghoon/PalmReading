@@ -12,6 +12,12 @@ import { ANIMAL_PERSONALITIES } from "@/lib/personality-data";
 import type { ModelPrediction } from "@/lib/ai-models";
 
 // 동물상 언어 데이터 타입 정의
+// Type definition for animal face language data
+// 動物顔の言語データの型定義
+// 动物相语言数据类型定义
+// Definisi tipe data bahasa wajah hewan
+// คำจำกัดความประเภทข้อมูลภาษาใบหน้าสัตว์
+// Định nghĩa kiểu dữ liệu ngôn ngữ khuôn mặt động vật
 interface AnimalLanguageData {
   traits: string[];
   description: string;
@@ -21,6 +27,12 @@ interface AnimalLanguageData {
 }
 
 // 카메라 캡처 타입 정의
+// Type definition for camera capture
+// カメラキャプチャの型定義
+// 相机捕获类型定义
+// Definisi tipe penangkapan kamera
+// คำจำกัดความประเภทการจับภาพกล้อง
+// Định nghĩa kiểu chụp camera
 interface CameraCapture {
   start: () => void;
   stop: () => void;
@@ -39,6 +51,12 @@ interface CameraCaptureOptions {
 }
 
 // 전역으로 CameraCapture 타입 선언
+// Global declaration of CameraCapture type
+// CameraCapture型のグローバル宣言
+// 全局声明CameraCapture类型
+// Deklarasi global tipe CameraCapture
+// การประกาศประเภท CameraCapture แบบทั่วโลก
+// Khai báo toàn cục kiểu CameraCapture
 declare global {
   interface Window {
     CameraCapture: {
@@ -69,6 +87,12 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
   const { t, language } = useLanguage();
   
   // 카메라 관련 상태 및 참조
+  // Camera-related states and references
+  // カメラ関連の状態と参照
+  // 相机相关状态和引用
+  // Status dan referensi terkait kamera
+  // สถานะและการอ้างอิงที่เกี่ยวข้องกับกล้อง
+  // Trạng thái và tham chiếu liên quan đến camera
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const photoRef = useRef<HTMLImageElement>(null);
@@ -85,8 +109,26 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
   } = useImageUpload();
   
   // 모델 URL 정의
-  const modelURL = '/PalmReading/attached_assets/model_1752161703239.json';
-  const metadataURL = '/PalmReading/attached_assets/metadata_1752161703239.json';
+  // Model URL definition
+  // モデルURLの定義
+  // 模型URL定义
+  // Definisi URL model
+  // การกำหนด URL ของโมเดล
+  // Định nghĩa URL mô hình
+  const modelURL = '/attached_assets/model_1752161703239.json';
+  const metadataURL = '/attached_assets/metadata_1752161703239.json';
+  
+  // 모델 URL 로깅
+  // Model URL logging
+  // モデルURLのロギング
+  // 模型URL日志记录
+  // Pencatatan URL model
+  // การบันทึก URL ของโมเดล
+  // Ghi nhật ký URL mô hình
+  useEffect(() => {
+    console.log('[AnimalFaceTest] Using model URL:', modelURL);
+    console.log('[AnimalFaceTest] Using metadata URL:', metadataURL);
+  }, []);
   
   const { 
     model,
@@ -243,7 +285,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                   personality: getAnimalInfo(validAnimalType, 'personality'),
                   charm: getAnimalInfo(validAnimalType, 'charm'),
                   dating: getAnimalInfo(validAnimalType, 'dating'),
-                  traits: validAnimalInfo.traits,
+                  traits: getAnimalInfo(validAnimalType, 'traits').split(','),
                   predictions
                 });
                 
@@ -269,12 +311,12 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
             // 현재 언어에 맞는 번역이 있는지 확인
             if (language !== 'ko') {
               const langData = animalInfo[language];
-              if (langData && typeof langData === 'object' && 'traits' in langData) {
+              if (langData && typeof langData === 'object') {
                 const typedLangData = langData as AnimalLanguageData;
-                traits = typedLangData.traits;
-                personality = typedLangData.personality;
-                charm = typedLangData.charm;
-                dating = typedLangData.dating;
+                if ('traits' in typedLangData) traits = typedLangData.traits;
+                if ('personality' in typedLangData) personality = typedLangData.personality;
+                if ('charm' in typedLangData) charm = typedLangData.charm;
+                if ('dating' in typedLangData) dating = typedLangData.dating;
               }
             }
           }
@@ -342,8 +384,8 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
   const getAnimalTypeInKorean = (animalType: string): string => {
     // 기본값 설정 (유효하지 않은 타입일 경우)
     if (!animalType || typeof animalType !== 'string') {
-      console.warn(`[AnimalFaceTest] Invalid animal type: ${animalType}, using default 'dog'`);
-      return '강아지상';
+      console.warn(`[AnimalFaceTest] Invalid animal type: ${animalType}, using default 'unknown'`);
+      return '알 수 없는 동물상';
     }
     
     const animalTypeMap: Record<string, string> = {
@@ -354,14 +396,15 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
       'bear': '곰상',
       'deer': '사슴상',
       'fox': '여우상',
+      'monkey': '원숭이상',
       'unknown': '알 수 없는 동물상'
     };
     
     // 소문자로 변환하여 일관성 유지
     const lowerCaseType = animalType.toLowerCase();
     
-    // 매핑된 한글 타입 또는 기본값 반환
-    const koreanType = animalTypeMap[lowerCaseType] || '강아지상';
+    // 매핑된 한글 타입 또는 알 수 없는 동물상 반환
+    const koreanType = animalTypeMap[lowerCaseType] || '알 수 없는 동물상';
     console.log(`[AnimalFaceTest] Converting ${animalType} to ${koreanType}`);
     
     return koreanType;
@@ -410,9 +453,16 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
     // 현재 언어에 맞는 번역이 있는지 확인
     if (language !== 'ko') {
       const langData = animalInfo[language];
-      if (langData && typeof langData === 'object' && field in langData) {
+      if (langData && typeof langData === 'object') {
         const typedLangData = langData as AnimalLanguageData;
-        value = typedLangData[field] as string;
+        if (field in typedLangData) {
+          value = typedLangData[field] as string;
+          console.log(`[AnimalFaceTest] Using translated ${field} for ${animalType} in ${language}:`, value);
+        } else {
+          console.warn(`[AnimalFaceTest] Missing translation for field '${field}' in language '${language}' for animal type '${animalType}'`);
+        }
+      } else {
+        console.warn(`[AnimalFaceTest] No translation data found for language '${language}' for animal type '${animalType}'`);
       }
     }
     
@@ -423,8 +473,110 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
   const getChartData = () => {
     if (!result?.predictions) return null;
     
+    // 각 동물상 타입에 대한 현재 언어의 번역 이름 가져오기
+    const getLocalizedAnimalName = (animalType: string): string => {
+      const koreanType = getAnimalTypeInKorean(animalType);
+      
+      // 현재 언어가 한국어면 한글 이름 그대로 사용
+      if (language === 'ko') {
+        return koreanType;
+      }
+      
+      // 영어 동물 이름 매핑
+      const englishNames: Record<string, string> = {
+        '강아지상': 'Dog',
+        '고양이상': 'Cat',
+        '토끼상': 'Rabbit',
+        '공룡상': 'Dinosaur',
+        '곰상': 'Bear',
+        '사슴상': 'Deer',
+        '여우상': 'Fox',
+        '원숭이상': 'Monkey',
+        '알 수 없는 동물상': 'Unknown'
+      };
+      
+      // 일본어 동물 이름 매핑
+      const japaneseNames: Record<string, string> = {
+        '강아지상': '犬顔',
+        '고양이상': '猫顔',
+        '토끼상': 'ウサギ顔',
+        '공룡상': '恐竜顔',
+        '곰상': 'クマ顔',
+        '사슴상': '鹿顔',
+        '여우상': 'キツネ顔',
+        '원숭이상': 'サル顔',
+        '알 수 없는 동물상': '不明な動物顔'
+      };
+      
+      // 중국어 동물 이름 매핑
+      const chineseNames: Record<string, string> = {
+        '강아지상': '狗脸',
+        '고양이상': '猫脸',
+        '토끼상': '兔子脸',
+        '공룡상': '恐龙脸',
+        '곰상': '熊脸',
+        '사슴상': '鹿脸',
+        '여우상': '狐狸脸',
+        '원숭이상': '猴子脸',
+        '알 수 없는 동물상': '未知动物脸'
+      };
+      
+      // 인도네시아어 동물 이름 매핑
+      const indonesianNames: Record<string, string> = {
+        '강아지상': 'Wajah Anjing',
+        '고양이상': 'Wajah Kucing',
+        '토끼상': 'Wajah Kelinci',
+        '공룡상': 'Wajah Dinosaurus',
+        '곰상': 'Wajah Beruang',
+        '사슴상': 'Wajah Rusa',
+        '여우상': 'Wajah Rubah',
+        '원숭이상': 'Wajah Monyet',
+        '알 수 없는 동물상': 'Wajah Hewan Tidak Dikenal'
+      };
+      
+      // 태국어 동물 이름 매핑
+      const thaiNames: Record<string, string> = {
+        '강아지상': 'หน้าสุนัข',
+        '고양이상': 'หน้าแมว',
+        '토끼상': 'หน้ากระต่าย',
+        '공룡상': 'หน้าไดโนเสาร์',
+        '곰상': 'หน้าหมี',
+        '사슴상': 'หน้ากวาง',
+        '여우상': 'หน้าจิ้งจอก',
+        '원숭이상': 'หน้าลิง',
+        '알 수 없는 동물상': 'หน้าสัตว์ที่ไม่รู้จัก'
+      };
+      
+      // 베트남어 동물 이름 매핑
+      const vietnameseNames: Record<string, string> = {
+        '강아지상': 'Mặt Chó',
+        '고양이상': 'Mặt Mèo',
+        '토끼상': 'Mặt Thỏ',
+        '공룡상': 'Mặt Khủng Long',
+        '곰상': 'Mặt Gấu',
+        '사슴상': 'Mặt Hươu',
+        '여우상': 'Mặt Cáo',
+        '원숭이상': 'Mặt Khỉ',
+        '알 수 없는 동물상': 'Mặt Động Vật Không Xác Định'
+      };
+      
+      // 현재 언어에 맞는 이름 매핑 선택
+      let nameMap: Record<string, string>;
+      switch (language) {
+        case 'en': nameMap = englishNames; break;
+        case 'ja': nameMap = japaneseNames; break;
+        case 'zh': nameMap = chineseNames; break;
+        case 'id': nameMap = indonesianNames; break;
+        case 'th': nameMap = thaiNames; break;
+        case 'vi': nameMap = vietnameseNames; break;
+        default: nameMap = englishNames; // 기본값은 영어
+      }
+      
+      return nameMap[koreanType] || koreanType;
+    };
+    
     return {
-      labels: result.predictions.map((p: ModelPrediction) => getAnimalTypeInKorean(p.className)),
+      labels: result.predictions.map((p: ModelPrediction) => getLocalizedAnimalName(p.className)),
       datasets: [
         {
           label: t.animalResult,
@@ -597,7 +749,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
           <div className="space-y-8">
             <div className="text-center">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {t.animalResult}: <span className="text-purple-600">{getAnimalTypeInKorean(result.animalType)}</span>
+                {t.animalResult}: <span className="text-purple-600">{getChartData()?.labels[0]}</span>
               </h3>
               <p className="text-gray-600">
                 {t.personalityAnalysis}: {result.confidence.toFixed(1)}%
@@ -638,7 +790,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
               <div>
                 <Card>
                   <CardHeader>
-                    <CardTitle>{getAnimalTypeInKorean(result.animalType)} {t.traits}</CardTitle>
+                    <CardTitle>{getChartData()?.labels[0]} {t.traits}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
