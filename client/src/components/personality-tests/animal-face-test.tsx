@@ -36,8 +36,8 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
   } = useImageUpload();
   
   // 모델 URL 정의
-  const modelURL = '/attached_assets/model.json';
-  const metadataURL = '/attached_assets/metadata.json';
+  const modelURL = '/PalmReading/attached_assets/model_1752161703239.json';
+  const metadataURL = '/PalmReading/attached_assets/metadata_1752161703239.json';
   
   const { 
     model,
@@ -61,13 +61,13 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
       // CSS 로드
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = '/camera-capture.css';
+      link.href = '/PalmReading/camera-capture.css';
       document.head.appendChild(link);
       
       // JS 로드
       const script = document.createElement('script');
       script.id = 'camera-capture-script';
-      script.src = '/camera-capture.js';
+      script.src = '/PalmReading/camera-capture.js';
       script.async = true;
       document.body.appendChild(script);
     }

@@ -140,7 +140,7 @@ export async function loadAnimalModel(): Promise<void> {
     
     console.log('[AI-Models] Loading animal model');
     // Load the pre-uploaded animal model using TensorFlow.js
-    const modelUrl = window.location.origin + '/attached_assets/model.json';
+    const modelUrl = window.location.origin + '/PalmReading/attached_assets/model_1752161703239.json';
     console.log('[AI-Models] Using animal model URL:', modelUrl);
     
     // 모델 파일 존재 여부 확인
@@ -200,8 +200,8 @@ export async function predictAnimalFace(imageElement: HTMLImageElement): Promise
   
   try {
     // 모델 로드
-    const modelURL = '/attached_assets/model.json';
-    const metadataURL = '/attached_assets/metadata.json';
+    const modelURL = '/PalmReading/attached_assets/model_1752161703239.json';
+    const metadataURL = '/PalmReading/attached_assets/metadata_1752161703239.json';
     const model = await loadModel(modelURL, metadataURL);
 
     // 예측 실행
@@ -235,8 +235,8 @@ export async function predictPalmReading(imageElement: HTMLImageElement): Promis
   
   try {
     // 모델 로드
-    const modelURL = window.location.origin + '/attached_assets/model.json';
-    const metadataURL = window.location.origin + '/attached_assets/metadata.json';
+    const modelURL = window.location.origin + '/PalmReading/attached_assets/model_1752161703239.json';
+    const metadataURL = window.location.origin + '/PalmReading/attached_assets/metadata_1752161703239.json';
     console.log('[AI-Models] Using palm model URL:', modelURL);
     console.log('[AI-Models] Using palm metadata URL:', metadataURL);
     const model = await loadModel(modelURL, metadataURL);
