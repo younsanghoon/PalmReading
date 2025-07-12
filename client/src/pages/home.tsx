@@ -50,11 +50,11 @@ export default function Home() {
   ];
 
   // 손금 테스트 관련 텍스트
-  const pageTitle = "손금 테스트";
-  const pageDescription = "여러가지 나의 모습을 테스트";
-  const footerTitle = "손금 테스트";
-  const footerDescription = "AI 기반 손금 분석으로 나의 운명을 확인하세요";
-  const copyright = "© 2024 손금 테스트. 모든 권리 보유.";
+  const pageTitle = "";
+  const pageDescription = "AI 기술로 알아보는 여러가지 나의 모습\n성격, 운세, 외모까지 다양한 테스트를 경험해보세요";
+  const footerTitle = "AI 성격 테스트";
+  const footerDescription = "인공지능 기반 다양한 성격 및 운세 분석 서비스";
+  const copyright = "© 2024 AI 테스트. 모든 권리 보유.";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
@@ -80,10 +80,12 @@ export default function Home() {
             {/* Content Area */}
             <div className="flex-1">
               <div className="text-center mb-12 animate-fade-in">
-                <h1 className="text-5xl font-bold gradient-text mb-6">
-                  {pageTitle}
-                </h1>
-                <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+                {pageTitle && (
+                  <h1 className="text-5xl font-bold gradient-text mb-6">
+                    {pageTitle}
+                  </h1>
+                )}
+                <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed whitespace-pre-line">
                   {pageDescription}
                 </p>
                 <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full mt-6"></div>

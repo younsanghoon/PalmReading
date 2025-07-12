@@ -8,6 +8,7 @@ import { useTeachableMachine } from "@/hooks/use-teachable-machine";
 import { ANIMAL_PERSONALITIES } from "@/lib/personality-data";
 import { Camera, Upload, Share2, RotateCcw, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLanguage } from "@/lib/i18n";
 
 interface AnimalFaceTestProps {
   open: boolean;
@@ -18,6 +19,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
   const [currentStep, setCurrentStep] = useState<'upload' | 'camera' | 'analyzing' | 'result'>('upload');
   const [result, setResult] = useState<any>(null);
   const [modelLoaded, setModelLoaded] = useState(false);
+  const { t, language } = useLanguage();
   
   // 카메라 관련 상태 및 참조
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -53,6 +55,27 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
       setModelLoaded(true);
     }
   }, [model]);
+
+  // 언어 변경 이벤트 리스너
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      // 언어 변경 시 필요한 상태 업데이트
+      if (result) {
+        // 결과가 있는 경우 결과 텍스트 업데이트
+        const updatedResult = {
+          ...result,
+          // 필요한 번역된 텍스트 업데이트
+        };
+        setResult(updatedResult);
+      }
+    };
+
+    window.addEventListener('languageChanged', handleLanguageChange);
+    
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange);
+    };
+  }, [result]);
 
   // 카메라 스크립트 로드
   useEffect(() => {
@@ -132,22 +155,33 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
     setCurrentStep('analyzing');
     
     try {
+      console.log('[AnimalFaceTest] Starting analysis');
       const predictions = await predictAnimal(imageElement);
+      console.log('[AnimalFaceTest] Predictions received:', predictions);
+      
       if (predictions && predictions.length > 0) {
         // Find the highest probability result
         const topPrediction = predictions.reduce((max, pred) => 
           pred.probability > max.probability ? pred : max
-        );
+        , predictions[0]);
         
         const animalType = topPrediction.className;
         const personality = ANIMAL_PERSONALITIES[animalType as keyof typeof ANIMAL_PERSONALITIES];
         
-        setResult({
+        if (!personality) {
+          console.error('[AnimalFaceTest] No personality data for animal type:', animalType);
+          throw new Error(`No personality data for ${animalType}`);
+        }
+        
+        const resultData = {
           animalType,
           confidence: topPrediction.probability * 100,
           predictions,
           ...personality
-        });
+        };
+        
+        console.log('[AnimalFaceTest] Setting result:', resultData);
+        setResult(resultData);
         
         // Save to localStorage
         const results = JSON.parse(localStorage.getItem('personalityResults') || '{}');
@@ -162,12 +196,12 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
       } else {
         setCurrentStep('upload');
         console.error('[AnimalFaceTest] No predictions returned');
-        alert('분석에 실패했습니다. 다른 사진으로 다시 시도해 주세요.');
+        alert(t.analysisError);
       }
     } catch (error) {
       console.error('[AnimalFaceTest] Analysis error:', error);
       setCurrentStep('upload');
-      alert('분석 중 오류가 발생했습니다. 다시 시도해 주세요.');
+      alert(t.analysisError);
     }
   };
 
@@ -187,8 +221,8 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'AI 동물상 분석 결과',
-          text: `나의 동물상은 ${result.animalType}입니다!`,
+          title: t.animalResult,
+          text: `${t.animalResult}: ${result.animalType}`,
           url: window.location.href
         });
       } catch (err) {
@@ -267,7 +301,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-gray-900">
-            동물상 AI 분석
+            {t.animalTestTitle}
           </DialogTitle>
         </DialogHeader>
 
@@ -278,7 +312,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                 <Camera className="w-8 h-8 text-purple-600" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
-                얼굴 사진을 업로드하세요
+                {t.uploadImage}
               </h3>
               <p className="text-gray-600">
                 정면을 바라보는 깔끔한 사진을 업로드하면 더 정확한 분석이 가능합니다.
@@ -292,14 +326,14 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                 disabled={isUploading}
               >
                 <Upload className="w-4 h-4 mr-2" />
-                사진 업로드
+                {t.uploadImage}
               </Button>
               <Button
                 variant="outline"
                 onClick={initCamera}
               >
                 <Camera className="w-4 h-4 mr-2" />
-                사진 촬영
+                {t.takePhoto}
               </Button>
             </div>
 
@@ -326,15 +360,15 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                   {isAnalyzing ? (
                     <>
                       <LoadingSpinner className="mr-2" />
-                      분석 중...
+                      {t.analyzing}
                     </>
                   ) : !modelLoaded ? (
                     <>
                       <LoadingSpinner className="mr-2" />
-                      모델 로딩 중...
+                      {t.loading}
                     </>
                   ) : (
-                    "분석 시작하기"
+                    t.start
                   )}
                 </Button>
                 {!modelLoaded && (
@@ -367,7 +401,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
               <button id="captureCameraButton" className="camera-button capture">사진 촬영</button>
               <button id="switchCameraButton" className="camera-button switch">카메라 전환</button>
               <Button onClick={() => setCurrentStep('upload')} variant="outline">
-                뒤로 가기
+                {t.previous}
               </Button>
             </div>
           </div>
@@ -375,12 +409,12 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
 
         {currentStep === 'analyzing' && (
           <div className="text-center py-12">
-            <LoadingSpinner size="large" className="mx-auto mb-4" />
+            <LoadingSpinner size="lg" className="mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              AI가 당신의 동물상을 분석하고 있습니다
+              {t.analyzing}
             </h3>
             <p className="text-gray-600">
-              잠시만 기다려주세요...
+              {t.loading}
             </p>
           </div>
         )}
@@ -389,10 +423,10 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
           <div className="space-y-8">
             <div className="text-center">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                당신의 동물상은 <span className="text-purple-600">{result.animalType}</span>입니다!
+                {t.animalResult}: <span className="text-purple-600">{result.animalType}</span>
               </h3>
               <p className="text-gray-600">
-                정확도: {result.confidence.toFixed(1)}%
+                {t.personalityAnalysis}: {result.confidence.toFixed(1)}%
               </p>
             </div>
 
@@ -400,7 +434,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
               <div>
                 <Card>
                   <CardHeader>
-                    <CardTitle>분석 결과</CardTitle>
+                    <CardTitle>{t.result}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="mb-4">
@@ -418,24 +452,24 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
               <div>
                 <Card>
                   <CardHeader>
-                    <CardTitle>{result.animalType}의 특징</CardTitle>
+                    <CardTitle>{result.animalType} {t.traits}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <h4 className="font-bold text-gray-900">성격</h4>
+                        <h4 className="font-bold text-gray-900">{t.personalityAnalysis}</h4>
                         <p className="text-gray-600">{result.personality}</p>
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-900">매력 포인트</h4>
+                        <h4 className="font-bold text-gray-900">{t.traits}</h4>
                         <p className="text-gray-600">{result.charm}</p>
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-900">연애 스타일</h4>
+                        <h4 className="font-bold text-gray-900">{t.description}</h4>
                         <p className="text-gray-600">{result.dating}</p>
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-900">잘 맞는 유형</h4>
+                        <h4 className="font-bold text-gray-900">{t.compatibility}</h4>
                         <div className="flex flex-wrap gap-2 mt-1">
                           {getAnimalCompatibility(result.animalType).best.map((type, i) => (
                             <span key={i} className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
@@ -456,14 +490,14 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                 variant="outline"
               >
                 <Share2 className="w-4 h-4 mr-2" />
-                결과 공유하기
+                {t.share}
               </Button>
               <Button
                 onClick={handleReset}
                 variant="outline"
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
-                다시 시도하기
+                {t.restart}
               </Button>
             </div>
           </div>

@@ -5,17 +5,17 @@ Chart.register(...registerables);
 
 interface ResultChartProps {
   data: any;
-  type: 'bar' | 'radar' | 'doughnut';
+  type?: 'bar' | 'radar' | 'doughnut';
   title?: string;
   className?: string;
 }
 
-export function ResultChart({ data, type, title, className }: ResultChartProps) {
+export function ResultChart({ data, type = 'bar', title, className }: ResultChartProps) {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
 
   useEffect(() => {
-    if (!chartRef.current) return;
+    if (!chartRef.current || !data) return;
 
     // Destroy existing chart
     if (chartInstance.current) {
@@ -67,6 +67,9 @@ export function ResultChart({ data, type, title, className }: ResultChartProps) 
       }
     };
   }, [data, type, title]);
+
+  // 데이터가 없는 경우 빈 div 반환
+  if (!data) return <div className={className}>데이터를 불러오는 중...</div>;
 
   return (
     <div className={className}>
