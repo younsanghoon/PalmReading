@@ -759,6 +759,12 @@ export function useLanguage() {
       localStorage.setItem('language', newLanguage);
       
       // 언어 변경 이벤트를 전파하여 모든 컴포넌트에 알림
+      // Propagate language change event to notify all components
+      // 言語変更イベントを伝播してすべてのコンポーネントに通知
+      // 传播语言更改事件以通知所有组件
+      // Menyebarkan event perubahan bahasa untuk memberi tahu semua komponen
+      // เผยแพร่เหตุการณ์การเปลี่ยนภาษาเพื่อแจ้งให้ส่วนประกอบทั้งหมดทราบ
+      // Truyền sự kiện thay đổi ngôn ngữ để thông báo cho tất cả các thành phần
       console.log('[i18n] Dispatching language change event:', newLanguage);
       const event = new CustomEvent('languageChanged', { 
         detail: { language: newLanguage },
@@ -768,6 +774,12 @@ export function useLanguage() {
       window.dispatchEvent(event);
       
       // 모달이나 팝업에도 변경 사항이 적용되도록 페이지 새로고침
+      // Refresh the page to apply changes to modals or popups as well
+      // モーダルやポップアップにも変更が適用されるようにページを更新
+      // 刷新页面以确保更改也应用于模态框或弹出窗口
+      // Muat ulang halaman untuk menerapkan perubahan ke modal atau popup juga
+      // รีเฟรชหน้าเพื่อใช้การเปลี่ยนแปลงกับโมดัลหรือป๊อปอัพด้วย
+      // Tải lại trang để áp dụng thay đổi cho cả modal hoặc popup
       console.log('[i18n] Reloading page to apply language change');
       window.location.reload();
     }

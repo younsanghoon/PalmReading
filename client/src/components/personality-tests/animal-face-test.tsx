@@ -340,6 +340,12 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
 
   // 동물상 타입 영어를 한글로 변환
   const getAnimalTypeInKorean = (animalType: string): string => {
+    // 기본값 설정 (유효하지 않은 타입일 경우)
+    if (!animalType || typeof animalType !== 'string') {
+      console.warn(`[AnimalFaceTest] Invalid animal type: ${animalType}, using default 'dog'`);
+      return '강아지상';
+    }
+    
     const animalTypeMap: Record<string, string> = {
       'dog': '강아지상',
       'cat': '고양이상',
@@ -347,21 +353,54 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
       'dinosaur': '공룡상',
       'bear': '곰상',
       'deer': '사슴상',
-      'fox': '여우상'
+      'fox': '여우상',
+      'unknown': '알 수 없는 동물상'
     };
     
-    const koreanType = animalTypeMap[animalType] || animalType;
+    // 소문자로 변환하여 일관성 유지
+    const lowerCaseType = animalType.toLowerCase();
+    
+    // 매핑된 한글 타입 또는 기본값 반환
+    const koreanType = animalTypeMap[lowerCaseType] || '강아지상';
     console.log(`[AnimalFaceTest] Converting ${animalType} to ${koreanType}`);
+    
     return koreanType;
   };
 
   // 결과 표시 부분 개선
   const getAnimalInfo = (animalType: string, field: keyof AnimalLanguageData): string => {
+    // 기본값 설정 (유효하지 않은 타입일 경우)
+    if (!animalType || typeof animalType !== 'string') {
+      console.warn(`[AnimalFaceTest] Invalid animal type in getAnimalInfo: ${animalType}, using default 'dog'`);
+      animalType = 'dog';
+    }
+    
     const koreanType = getAnimalTypeInKorean(animalType);
     const animalInfo = ANIMAL_PERSONALITIES[koreanType as keyof typeof ANIMAL_PERSONALITIES];
     
     if (!animalInfo) {
       console.warn(`[AnimalFaceTest] No data found for animal type: ${koreanType}`);
+      
+      // 기본 동물상 정보 사용 (강아지상)
+      const defaultAnimalInfo = ANIMAL_PERSONALITIES['강아지상'];
+      if (defaultAnimalInfo) {
+        console.log(`[AnimalFaceTest] Using default animal info: 강아지상`);
+        
+        // 기본값은 한국어 데이터
+        let value = defaultAnimalInfo[field] as string;
+        
+        // 현재 언어에 맞는 번역이 있는지 확인
+        if (language !== 'ko') {
+          const langData = defaultAnimalInfo[language];
+          if (langData && typeof langData === 'object' && field in langData) {
+            const typedLangData = langData as AnimalLanguageData;
+            value = typedLangData[field] as string;
+          }
+        }
+        
+        return value;
+      }
+      
       return field === 'traits' ? '특징 정보 없음' : '정보가 없습니다';
     }
     
@@ -563,6 +602,18 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
               <p className="text-gray-600">
                 {t.personalityAnalysis}: {result.confidence.toFixed(1)}%
               </p>
+              {/* 디버깅 정보 (개발 모드에서만 표시) */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mt-2 p-2 bg-gray-100 rounded text-xs text-left">
+                  <p><strong>원본 타입:</strong> {result.animalType}</p>
+                  <p><strong>한글 타입:</strong> {getAnimalTypeInKorean(result.animalType)}</p>
+                  <p><strong>모든 예측:</strong> 
+                    {result.predictions.map(p => 
+                      `${getAnimalTypeInKorean(p.className)}(${(p.probability * 100).toFixed(1)}%) `
+                    )}
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
@@ -594,19 +645,19 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                       <div>
                         <h4 className="font-bold text-gray-900">{t.personalityAnalysis}</h4>
                         <p className="text-gray-600">
-                          {getAnimalInfo(result.animalType, 'personality')}
+                          {result.personality || getAnimalInfo(result.animalType, 'personality')}
                         </p>
                       </div>
                       <div>
                         <h4 className="font-bold text-gray-900">{t.traits}</h4>
                         <p className="text-gray-600">
-                          {getAnimalInfo(result.animalType, 'charm')}
+                          {result.charm || getAnimalInfo(result.animalType, 'charm')}
                         </p>
                       </div>
                       <div>
                         <h4 className="font-bold text-gray-900">{t.description}</h4>
                         <p className="text-gray-600">
-                          {getAnimalInfo(result.animalType, 'dating')}
+                          {result.dating || getAnimalInfo(result.animalType, 'dating')}
                         </p>
                       </div>
                     </div>

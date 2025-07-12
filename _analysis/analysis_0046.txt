@@ -1,0 +1,114 @@
+# 프로젝트 번역 시스템 분석
+
+## 1. 번역 시스템 구조
+
+### 1.1 지원 언어
+프로젝트는 다음 7개 언어를 지원합니다:
+- 한국어 (ko) - 기본 언어
+- 영어 (en)
+- 일본어 (ja)
+- 중국어 (zh)
+- 인도네시아어 (id)
+- 태국어 (th)
+- 베트남어 (vi)
+
+### 1.2 핵심 파일
+- `client/src/lib/i18n.ts`: 모든 번역 텍스트와 언어 관리 로직 포함
+
+### 1.3 주요 컴포넌트
+1. **Translations 인터페이스**: 모든 번역 가능한 문자열 정의
+2. **translations 객체**: 각 언어별 번역 텍스트 매핑
+3. **useLanguage 훅**: 언어 상태 관리 및 변경 기능 제공
+4. **languageOptions**: 언어 선택기에 표시할 언어 옵션 정의
+
+## 2. 번역 시스템 작동 방식
+
+### 2.1 언어 선택 및 저장
+- 사용자 언어 설정은 localStorage에 저장됨
+- 저장된 설정이 없을 경우 브라우저 언어 자동 감지
+- 기본 언어는 한국어(ko)로 설정
+
+```typescript
+const [language, setLanguage] = useState<Language>(() => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('language');
+    if (saved && Object.keys(translations).includes(saved)) {
+      return saved as Language;
+    }
+    
+    // Auto-detect browser language
+    const browserLang = navigator.language.toLowerCase();
+    if (browserLang.startsWith('en')) return 'en';
+    if (browserLang.startsWith('ja')) return 'ja';
+    if (browserLang.startsWith('zh')) return 'zh';
+    if (browserLang.startsWith('id')) return 'id';
+    if (browserLang.startsWith('th')) return 'th';
+    if (browserLang.startsWith('vi')) return 'vi';
+  }
+  return 'ko'; // Default to Korean
+});
+```
+
+### 2.2 언어 변경 처리
+- 언어 변경 시 localStorage에 설정 저장
+- 'languageChanged' 커스텀 이벤트 발생
+- 모달/팝업 등에 변경사항 적용을 위해 페이지 새로고침
+
+```typescript
+const changeLanguage = (newLanguage: Language) => {
+  setLanguage(newLanguage);
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('language', newLanguage);
+    
+    const event = new CustomEvent('languageChanged', { 
+      detail: { language: newLanguage },
+      bubbles: true,
+      cancelable: true
+    });
+    window.dispatchEvent(event);
+    
+    window.location.reload();
+  }
+};
+```
+
+### 2.3 HTML lang 속성 업데이트
+- 언어 변경 시 document.documentElement.lang 속성 업데이트
+
+```typescript
+useEffect(() => {
+  // Update HTML lang attribute
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = language;
+  }
+}, [language]);
+```
+
+## 3. 번역 내용 구성
+
+번역 텍스트는 다음 카테고리로 구성됩니다:
+1. **Navigation**: 메뉴 및 네비게이션 항목
+2. **Common**: 공통 버튼 및 UI 요소
+3. **Test descriptions**: 각 테스트 설명
+4. **MBTI specific**: MBTI 테스트 관련 텍스트
+5. **Enneagram specific**: 에니어그램 테스트 관련 텍스트
+6. **Animal test specific**: 동물상 테스트 관련 텍스트
+7. **Camera related**: 카메라 기능 관련 텍스트
+8. **Palm test specific**: 손금 테스트 관련 텍스트
+9. **Results**: 결과 표시 관련 텍스트
+10. **Error messages**: 오류 메시지
+11. **Home page**: 홈페이지 관련 텍스트
+
+## 4. 최근 수정 사항
+
+- 태국어(th) 번역에서 누락되었던 `palmImageInstructions` 필드 추가:
+  ```
+  palmImageInstructions: 'ถ่ายภาพที่ชัดเจนโดยเปิดฝ่ามือ ตรวจสอบให้แน่ใจว่าแสงสว่างเพียงพอเพื่อให้เห็นเส้นลายมือชัดเจน'
+  ```
+
+## 5. 향후 개선 사항
+
+1. **언어 변경 시 페이지 새로고침 없이 실시간 업데이트**: React Context API를 활용해 전체 페이지 새로고침 없이 언어 변경 적용
+2. **자동 번역 검증 시스템**: 누락된 번역이나 불일치 항목을 자동으로 감지하는 유틸리티 함수 추가
+3. **지역화된 날짜 및 숫자 형식**: 각 언어/지역에 맞는 날짜 및 숫자 형식 지원
+4. **RTL(Right-to-Left) 언어 지원**: 아랍어, 히브리어 등 RTL 언어 추가 시 레이아웃 지원 

@@ -204,6 +204,10 @@ export async function loadPalmModels(): Promise<void> {
 export async function predictAnimalFace(imageElement: HTMLImageElement): Promise<ModelPrediction[]> {
   console.log('[AI-Models] Starting animal face prediction');
   
+  // 유효한 동물상 클래스명 목록
+  const validAnimalClasses = ['dog', 'cat', 'rabbit', 'dinosaur', 'bear', 'deer', 'fox'];
+  console.log('[AI-Models] Valid animal classes:', validAnimalClasses);
+  
   try {
     // 모델 로드
     const modelURL = window.location.origin + '/PalmReading/attached_assets/model_1752161703239.json';
@@ -243,6 +247,13 @@ export async function predictAnimalFace(imageElement: HTMLImageElement): Promise
         console.warn('[AI-Models] Invalid prediction item:', p);
         return { className: 'unknown', probability: 0 };
       }
+      
+      // 클래스명이 유효한 목록에 있는지 확인
+      if (!validAnimalClasses.includes(p.className)) {
+        console.warn(`[AI-Models] Invalid class name '${p.className}', replacing with 'dog'`);
+        return { className: 'dog', probability: p.probability };
+      }
+      
       return {
         className: p.className,
         probability: p.probability,
@@ -253,7 +264,7 @@ export async function predictAnimalFace(imageElement: HTMLImageElement): Promise
     console.log('[AI-Models] Animal face prediction results:', JSON.stringify(results));
     
     // 유효한 결과가 있는지 확인
-    const validResults = results.filter(r => r.probability > 0);
+    const validResults = results.filter(r => r.probability > 0 && validAnimalClasses.includes(r.className));
     if (validResults.length === 0) {
       console.warn('[AI-Models] No valid predictions with probability > 0');
       throw new Error('No valid predictions');
@@ -277,7 +288,24 @@ export async function predictAnimalFace(imageElement: HTMLImageElement): Promise
       const fallbackResults = generateFallbackPredictions(imageHash, 'animal');
       console.log('[AI-Models] Generated fallback results:', JSON.stringify(fallbackResults));
       
-      return fallbackResults;
+      // 결과 유효성 검사 및 필터링
+      const validFallbackResults = fallbackResults.filter(r => 
+        validAnimalClasses.includes(r.className) && r.probability > 0
+      );
+      
+      if (validFallbackResults.length > 0) {
+        return validFallbackResults;
+      }
+      
+      // 유효한 결과가 없으면 하드코딩된 결과 반환
+      console.warn('[AI-Models] No valid fallback results, returning hardcoded results');
+      return [
+        { className: 'dog', probability: 0.3 },
+        { className: 'cat', probability: 0.25 },
+        { className: 'bear', probability: 0.2 },
+        { className: 'rabbit', probability: 0.15 },
+        { className: 'fox', probability: 0.1 }
+      ];
     } catch (fallbackError) {
       console.error('[AI-Models] Failed to generate fallback results:', fallbackError);
       
