@@ -206,30 +206,39 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
           const koreanAnimalType = getAnimalTypeInKorean(animalType);
           const confidence = topPrediction.probability * 100;
           
+          console.log('[AnimalFaceTest] Top prediction:', animalType, 'Korean type:', koreanAnimalType);
+          console.log('[AnimalFaceTest] Available animal types in ANIMAL_PERSONALITIES:', Object.keys(ANIMAL_PERSONALITIES));
+          
           // 동물상에 따른 성격 정보 가져오기
-          const animalInfo = ANIMAL_PERSONALITIES[koreanAnimalType as keyof typeof ANIMAL_PERSONALITIES] || {
-            traits: ['특징 정보 없음'],
-            description: '정보가 없습니다',
-            personality: '성격 정보가 없습니다',
-            charm: '매력 정보가 없습니다',
-            dating: '연애 정보가 없습니다'
-          };
+          const animalInfo = ANIMAL_PERSONALITIES[koreanAnimalType as keyof typeof ANIMAL_PERSONALITIES];
           
-          // 현재 언어에 맞는 특성과 정보 가져오기
-          let traits = animalInfo.traits;
-          let personality = animalInfo.personality;
-          let charm = animalInfo.charm;
-          let dating = animalInfo.dating;
+          if (!animalInfo) {
+            console.error(`[AnimalFaceTest] No data found for animal type: ${koreanAnimalType}`);
+          }
           
-          // 현재 언어에 맞는 번역이 있는지 확인
-          if (language !== 'ko') {
-            const langData = animalInfo[language];
-            if (langData && typeof langData === 'object' && 'traits' in langData) {
-              const typedLangData = langData as AnimalLanguageData;
-              traits = typedLangData.traits;
-              personality = typedLangData.personality;
-              charm = typedLangData.charm;
-              dating = typedLangData.dating;
+          // 기본 정보 설정
+          let traits = ['특징 정보 없음'];
+          let personality = '성격 정보가 없습니다';
+          let charm = '매력 정보가 없습니다';
+          let dating = '연애 정보가 없습니다';
+          
+          // 동물상 정보가 있으면 해당 정보 사용
+          if (animalInfo) {
+            traits = animalInfo.traits;
+            personality = animalInfo.personality;
+            charm = animalInfo.charm;
+            dating = animalInfo.dating;
+            
+            // 현재 언어에 맞는 번역이 있는지 확인
+            if (language !== 'ko') {
+              const langData = animalInfo[language];
+              if (langData && typeof langData === 'object' && 'traits' in langData) {
+                const typedLangData = langData as AnimalLanguageData;
+                traits = typedLangData.traits;
+                personality = typedLangData.personality;
+                charm = typedLangData.charm;
+                dating = typedLangData.dating;
+              }
             }
           }
           
@@ -301,7 +310,34 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
       'fox': '여우상'
     };
     
-    return animalTypeMap[animalType] || animalType;
+    const koreanType = animalTypeMap[animalType] || animalType;
+    console.log(`[AnimalFaceTest] Converting ${animalType} to ${koreanType}`);
+    return koreanType;
+  };
+
+  // 결과 표시 부분 개선
+  const getAnimalInfo = (animalType: string, field: keyof AnimalLanguageData): string => {
+    const koreanType = getAnimalTypeInKorean(animalType);
+    const animalInfo = ANIMAL_PERSONALITIES[koreanType as keyof typeof ANIMAL_PERSONALITIES];
+    
+    if (!animalInfo) {
+      console.warn(`[AnimalFaceTest] No data found for animal type: ${koreanType}`);
+      return field === 'traits' ? '특징 정보 없음' : '정보가 없습니다';
+    }
+    
+    // 기본값은 한국어 데이터
+    let value = animalInfo[field] as string;
+    
+    // 현재 언어에 맞는 번역이 있는지 확인
+    if (language !== 'ko') {
+      const langData = animalInfo[language];
+      if (langData && typeof langData === 'object' && field in langData) {
+        const typedLangData = langData as AnimalLanguageData;
+        value = typedLangData[field] as string;
+      }
+    }
+    
+    return value;
   };
 
   // 차트 데이터 생성
@@ -518,55 +554,19 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                       <div>
                         <h4 className="font-bold text-gray-900">{t.personalityAnalysis}</h4>
                         <p className="text-gray-600">
-                          {(() => {
-                            const animalData = ANIMAL_PERSONALITIES[getAnimalTypeInKorean(result.animalType) as keyof typeof ANIMAL_PERSONALITIES];
-                            if (!animalData) return result.personality;
-                            
-                            if (language !== 'ko') {
-                              const langData = animalData[language];
-                              if (langData && typeof langData === 'object' && 'personality' in langData) {
-                                const typedLangData = langData as AnimalLanguageData;
-                                return typedLangData.personality;
-                              }
-                            }
-                            return result.personality;
-                          })()}
+                          {getAnimalInfo(result.animalType, 'personality')}
                         </p>
                       </div>
                       <div>
                         <h4 className="font-bold text-gray-900">{t.traits}</h4>
                         <p className="text-gray-600">
-                          {(() => {
-                            const animalData = ANIMAL_PERSONALITIES[getAnimalTypeInKorean(result.animalType) as keyof typeof ANIMAL_PERSONALITIES];
-                            if (!animalData) return result.charm;
-                            
-                            if (language !== 'ko') {
-                              const langData = animalData[language];
-                              if (langData && typeof langData === 'object' && 'charm' in langData) {
-                                const typedLangData = langData as AnimalLanguageData;
-                                return typedLangData.charm;
-                              }
-                            }
-                            return result.charm;
-                          })()}
+                          {getAnimalInfo(result.animalType, 'charm')}
                         </p>
                       </div>
                       <div>
                         <h4 className="font-bold text-gray-900">{t.description}</h4>
                         <p className="text-gray-600">
-                          {(() => {
-                            const animalData = ANIMAL_PERSONALITIES[getAnimalTypeInKorean(result.animalType) as keyof typeof ANIMAL_PERSONALITIES];
-                            if (!animalData) return result.dating;
-                            
-                            if (language !== 'ko') {
-                              const langData = animalData[language];
-                              if (langData && typeof langData === 'object' && 'dating' in langData) {
-                                const typedLangData = langData as AnimalLanguageData;
-                                return typedLangData.dating;
-                              }
-                            }
-                            return result.dating;
-                          })()}
+                          {getAnimalInfo(result.animalType, 'dating')}
                         </p>
                       </div>
                     </div>

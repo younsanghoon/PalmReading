@@ -1,0 +1,67 @@
+# 동물상 테스트 기능 분석 및 문제 해결
+
+## 동물상 테스트 구조
+- `client/src/components/personality-tests/animal-face-test.tsx`: 동물상 테스트 UI 컴포넌트
+- `client/src/lib/ai-models.ts`: AI 모델 관련 기능 (예측, 모델 로드 등)
+- `client/src/lib/personality-data.ts`: 동물상별 성격 데이터 정의
+- `client/src/hooks/use-teachable-machine.ts`: Teachable Machine 모델 사용을 위한 훅
+
+## 동물상 테스트 작동 방식
+1. 사용자가 이미지 업로드 또는 카메라로 촬영
+2. 업로드된 이미지를 Teachable Machine 모델로 분석
+3. 모델이 각 동물상(dog, cat, rabbit 등)에 대한 확률 반환
+4. 가장 높은 확률의 동물상을 결과로 표시
+5. 해당 동물상에 맞는 성격 정보를 `personality-data.ts`에서 가져와 표시
+
+## 모델 처리 과정
+- 모델 URL: `/PalmReading/attached_assets/model_1752161703239.json`
+- 메타데이터 URL: `/PalmReading/attached_assets/metadata_1752161703239.json`
+- 모델 로드 실패 시 `generateFallbackPredictions` 함수로 대체 결과 생성
+- 모델은 영어 클래스명(dog, cat 등)을 사용하지만, UI에는 한글로 변환하여 표시
+
+## 동물상 클래스 매핑
+- 'dog': '강아지상'
+- 'cat': '고양이상'
+- 'rabbit': '토끼상'
+- 'dinosaur': '공룡상'
+- 'bear': '곰상'
+- 'deer': '사슴상'
+- 'fox': '여우상'
+
+## 발견된 문제점
+1. 모델 예측 결과와 성격 데이터 간 매핑 불일치
+   - 모델은 영어 클래스명을 반환하지만, 성격 데이터는 한글 키를 사용
+   - 영어에서 한글로 변환 후 데이터 조회 과정에서 오류 발생 가능성
+
+2. 오류 처리 및 fallback 메커니즘 취약점
+   - 모델 예측 실패 시 fallback 결과 생성 과정에서 오류 발생 가능성
+   - 유효하지 않은 예측 결과에 대한 처리 부족
+
+3. 디버깅 정보 부족
+   - 문제 발생 시 원인 파악을 위한 로그 부족
+
+## 개선 방안
+1. 데이터 매핑 로직 강화
+   - `getAnimalInfo` 함수 추가하여 동물상 정보 조회 로직 통합
+   - 디버깅을 위한 로그 추가
+
+2. 오류 처리 강화
+   - 예측 결과 유효성 검사 추가
+   - fallback 메커니즘 개선
+
+3. 로깅 강화
+   - 주요 단계마다 디버깅 정보 로깅
+   - 오류 발생 시 상세 정보 기록
+
+## 향후 개선 방향
+1. 모델 정확도 향상
+   - 더 많은 데이터로 모델 재학습 고려
+   - 다양한 얼굴 각도와 조명 조건에서의 성능 개선
+
+2. UI/UX 개선
+   - 결과 표시 방식 개선
+   - 분석 중 로딩 상태 표시 개선
+
+3. 오프라인 지원 강화
+   - 모델 캐싱 및 오프라인 작동 지원
+   - 모델 크기 최적화 

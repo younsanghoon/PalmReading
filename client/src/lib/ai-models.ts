@@ -107,10 +107,13 @@ export function generateFallbackPredictions(hash: number, modelURL: string): { c
   
   if (modelURL.includes('animal')) {
     classes = ['dog', 'cat', 'rabbit', 'dinosaur', 'bear', 'deer', 'fox'];
+    console.log('[AI-Models] Using animal classes for fallback:', classes);
   } else if (modelURL.includes('palm')) {
     classes = ['건강운', '금전운', '애정운', '학업운', '직장운'];
+    console.log('[AI-Models] Using palm classes for fallback:', classes);
   } else {
     classes = ['유형A', '유형B', '유형C', '유형D', '유형E'];
+    console.log('[AI-Models] Using default classes for fallback:', classes);
   }
   
   // 해시값을 기반으로 일관된 확률 분포 생성
@@ -128,10 +131,13 @@ export function generateFallbackPredictions(hash: number, modelURL: string): { c
   probabilities = probabilities.map(p => p / sum);
   
   // 결과 객체 생성
-  return classes.map((className, index) => ({
+  const results = classes.map((className, index) => ({
     className,
     probability: probabilities[index]
   }));
+  
+  console.log('[AI-Models] Generated fallback predictions:', results);
+  return results;
 }
 
 export async function loadAnimalModel(): Promise<void> {
@@ -210,14 +216,35 @@ export async function predictAnimalFace(imageElement: HTMLImageElement): Promise
     console.log('[AI-Models] Running animal face prediction');
     const predictions = await model.predict(imageElement);
     
-    // 결과 변환
-    const results = predictions.map((p) => ({
-      className: p.className,
-      probability: p.probability,
-    }));
+    // 결과 변환 및 확인
+    if (!predictions || !Array.isArray(predictions) || predictions.length === 0) {
+      console.warn('[AI-Models] Empty or invalid predictions received from model');
+      throw new Error('Invalid prediction results');
+    }
     
+    // 유효한 결과인지 확인
+    const results = predictions.map((p) => {
+      if (!p || typeof p.className !== 'string' || typeof p.probability !== 'number') {
+        console.warn('[AI-Models] Invalid prediction item:', p);
+        return { className: 'unknown', probability: 0 };
+      }
+      return {
+        className: p.className,
+        probability: p.probability,
+      };
+    });
+    
+    // 결과 로깅
     console.log('[AI-Models] Animal face prediction results:', results);
-    return results;
+    
+    // 유효한 결과가 있는지 확인
+    const validResults = results.filter(r => r.probability > 0);
+    if (validResults.length === 0) {
+      console.warn('[AI-Models] No valid predictions with probability > 0');
+      throw new Error('No valid predictions');
+    }
+    
+    return validResults;
   } catch (error) {
     console.error('[AI-Models] Error during animal face prediction:', error);
     
@@ -225,7 +252,6 @@ export async function predictAnimalFace(imageElement: HTMLImageElement): Promise
     console.warn('[AI-Models] Generating fallback animal face prediction');
     const imageHash = await generateSimpleHash(imageElement.src);
     const fallbackResults = generateFallbackPredictions(imageHash, 'animal');
-    console.log('[AI-Models] Fallback animal face prediction results:', fallbackResults);
     
     return fallbackResults;
   }
