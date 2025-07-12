@@ -90,7 +90,7 @@ async function loadModel(modelURL: string, metadataURL: string): Promise<tmImage
 }
 
 // 간단한 해시 생성 함수
-async function generateSimpleHash(str: string): Promise<number> {
+export async function generateSimpleHash(str: string): Promise<number> {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
@@ -101,7 +101,7 @@ async function generateSimpleHash(str: string): Promise<number> {
 }
 
 // 대체 예측 결과 생성
-function generateFallbackPredictions(hash: number, modelURL: string): { className: string; probability: number }[] {
+export function generateFallbackPredictions(hash: number, modelURL: string): { className: string; probability: number }[] {
   // 모델 URL에 따라 다른 클래스 세트 사용
   let classes: string[] = [];
   
@@ -200,8 +200,10 @@ export async function predictAnimalFace(imageElement: HTMLImageElement): Promise
   
   try {
     // 모델 로드
-    const modelURL = '/PalmReading/attached_assets/model_1752161703239.json';
-    const metadataURL = '/PalmReading/attached_assets/metadata_1752161703239.json';
+    const modelURL = window.location.origin + '/PalmReading/attached_assets/model_1752161703239.json';
+    const metadataURL = window.location.origin + '/PalmReading/attached_assets/metadata_1752161703239.json';
+    console.log('[AI-Models] Using animal model URLs:', { modelURL, metadataURL });
+    
     const model = await loadModel(modelURL, metadataURL);
 
     // 예측 실행

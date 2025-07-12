@@ -1,5 +1,11 @@
 import React, { useState, useCallback } from 'react';
-import { predictAnimalFace, predictPalmReading, ModelPrediction } from '../lib/ai-models';
+import { 
+  predictAnimalFace, 
+  predictPalmReading, 
+  ModelPrediction,
+  generateSimpleHash,
+  generateFallbackPredictions
+} from '../lib/ai-models';
 
 interface UseTeachableMachineProps {
   modelURL?: string;
@@ -46,12 +52,26 @@ export function useTeachableMachine({ modelURL, metadataURL }: UseTeachableMachi
     setError(null);
 
     try {
+      console.log('[useTeachableMachine] Calling predictAnimalFace');
       const predictions = await predictAnimalFace(imageElement);
+      console.log('[useTeachableMachine] Received predictions:', predictions);
       return predictions;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to analyze animal face';
+      console.error('[useTeachableMachine] Error in predictAnimal:', errorMessage);
       setError(errorMessage);
-      return null;
+      
+      // 오류 발생 시에도 fallback 결과를 반환하여 UI가 계속 작동하도록 함
+      try {
+        console.log('[useTeachableMachine] Attempting to generate fallback results');
+        const imageHash = await generateSimpleHash(imageElement.src);
+        const fallbackResults = generateFallbackPredictions(imageHash, 'animal');
+        console.log('[useTeachableMachine] Generated fallback results:', fallbackResults);
+        return fallbackResults;
+      } catch (fallbackErr) {
+        console.error('[useTeachableMachine] Failed to generate fallback results:', fallbackErr);
+        return null;
+      }
     } finally {
       setIsLoading(false);
     }
