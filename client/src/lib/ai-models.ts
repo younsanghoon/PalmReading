@@ -106,7 +106,7 @@ export function generateFallbackPredictions(hash: number, modelURL: string): { c
   let classes: string[] = [];
   
   if (modelURL.includes('animal')) {
-    classes = ['강아지상', '고양이상', '곰상', '여우상', '원숭이상', '토끼상'];
+    classes = ['dog', 'cat', 'rabbit', 'dinosaur', 'bear', 'deer', 'fox'];
   } else if (modelURL.includes('palm')) {
     classes = ['건강운', '금전운', '애정운', '학업운', '직장운'];
   } else {

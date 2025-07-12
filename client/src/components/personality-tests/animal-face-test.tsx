@@ -11,6 +11,15 @@ import { useLanguage } from "@/lib/i18n";
 import { ANIMAL_PERSONALITIES } from "@/lib/personality-data";
 import type { ModelPrediction } from "@/lib/ai-models";
 
+// 동물상 언어 데이터 타입 정의
+interface AnimalLanguageData {
+  traits: string[];
+  description: string;
+  personality: string;
+  charm: string;
+  dating: string;
+}
+
 // 카메라 캡처 타입 정의
 interface CameraCapture {
   start: () => void;
@@ -194,10 +203,11 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
             pred.probability > max.probability ? pred : max, predictions[0]);
           
           const animalType = topPrediction.className;
+          const koreanAnimalType = getAnimalTypeInKorean(animalType);
           const confidence = topPrediction.probability * 100;
           
           // 동물상에 따른 성격 정보 가져오기
-          const animalInfo = ANIMAL_PERSONALITIES[animalType as keyof typeof ANIMAL_PERSONALITIES] || {
+          const animalInfo = ANIMAL_PERSONALITIES[koreanAnimalType as keyof typeof ANIMAL_PERSONALITIES] || {
             traits: ['특징 정보 없음'],
             description: '정보가 없습니다',
             personality: '성격 정보가 없습니다',
@@ -205,14 +215,32 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
             dating: '연애 정보가 없습니다'
           };
           
+          // 현재 언어에 맞는 특성과 정보 가져오기
+          let traits = animalInfo.traits;
+          let personality = animalInfo.personality;
+          let charm = animalInfo.charm;
+          let dating = animalInfo.dating;
+          
+          // 현재 언어에 맞는 번역이 있는지 확인
+          if (language !== 'ko') {
+            const langData = animalInfo[language];
+            if (langData && typeof langData === 'object' && 'traits' in langData) {
+              const typedLangData = langData as AnimalLanguageData;
+              traits = typedLangData.traits;
+              personality = typedLangData.personality;
+              charm = typedLangData.charm;
+              dating = typedLangData.dating;
+            }
+          }
+          
           // 결과 설정
           setResult({
             animalType,
             confidence,
-            personality: animalInfo.personality,
-            charm: animalInfo.charm,
-            dating: animalInfo.dating,
-            traits: animalInfo.traits,
+            personality,
+            charm,
+            dating,
+            traits,
             predictions
           });
           
@@ -242,7 +270,8 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
   const handleShare = async () => {
     if (!result) return;
     
-    const shareText = `내 동물상 결과: ${result.animalType} (${result.confidence.toFixed(1)}%)\n${window.location.href}`;
+    const koreanAnimalType = getAnimalTypeInKorean(result.animalType);
+    const shareText = `내 동물상 결과: ${koreanAnimalType} (${result.confidence.toFixed(1)}%)\n${window.location.href}`;
     
     try {
       if (navigator.share) {
@@ -260,12 +289,27 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
     }
   };
 
+  // 동물상 타입 영어를 한글로 변환
+  const getAnimalTypeInKorean = (animalType: string): string => {
+    const animalTypeMap: Record<string, string> = {
+      'dog': '강아지상',
+      'cat': '고양이상',
+      'rabbit': '토끼상',
+      'dinosaur': '공룡상',
+      'bear': '곰상',
+      'deer': '사슴상',
+      'fox': '여우상'
+    };
+    
+    return animalTypeMap[animalType] || animalType;
+  };
+
   // 차트 데이터 생성
   const getChartData = () => {
     if (!result?.predictions) return null;
     
     return {
-      labels: result.predictions.map((p: ModelPrediction) => p.className),
+      labels: result.predictions.map((p: ModelPrediction) => getAnimalTypeInKorean(p.className)),
       datasets: [
         {
           label: t.animalResult,
@@ -280,20 +324,23 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
 
   // 동물상 궁합 정보
   const getAnimalCompatibility = (animalType: string) => {
+    // 영어 동물상을 한글로 변환
+    const koreanAnimalType = getAnimalTypeInKorean(animalType);
+    
     const compatibilityData: Record<string, { best: string[], good: string[], description: string }> = {
-      강아지상: {
+      '강아지상': {
         best: ['고양이상', '토끼상'],
         good: ['곰상'],
         description: '강아지상은 고양이상, 토끼상과 최고의 궁합을 이룹니다.'
       },
-      고양이상: {
+      '고양이상': {
         best: ['강아지상', '여우상'],
         good: ['원숭이상'],
         description: '고양이상은 강아지상, 여우상과 최고의 궁합을 이룹니다.'
       }
     };
     
-    return compatibilityData[animalType] || {
+    return compatibilityData[koreanAnimalType] || {
       best: ['모든 동물상'],
       good: ['모든 동물상'],
       description: '모든 동물상과 좋은 관계를 형성할 수 있습니다.'
@@ -435,7 +482,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
           <div className="space-y-8">
             <div className="text-center">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {t.animalResult}: <span className="text-purple-600">{result.animalType}</span>
+                {t.animalResult}: <span className="text-purple-600">{getAnimalTypeInKorean(result.animalType)}</span>
               </h3>
               <p className="text-gray-600">
                 {t.personalityAnalysis}: {result.confidence.toFixed(1)}%
@@ -464,32 +511,62 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
               <div>
                 <Card>
                   <CardHeader>
-                    <CardTitle>{result.animalType} {t.traits}</CardTitle>
+                    <CardTitle>{getAnimalTypeInKorean(result.animalType)} {t.traits}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div>
                         <h4 className="font-bold text-gray-900">{t.personalityAnalysis}</h4>
                         <p className="text-gray-600">
-                          {language === 'en' && ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES]?.en?.personality
-                            ? ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES].en.personality
-                            : result.personality}
+                          {(() => {
+                            const animalData = ANIMAL_PERSONALITIES[getAnimalTypeInKorean(result.animalType) as keyof typeof ANIMAL_PERSONALITIES];
+                            if (!animalData) return result.personality;
+                            
+                            if (language !== 'ko') {
+                              const langData = animalData[language];
+                              if (langData && typeof langData === 'object' && 'personality' in langData) {
+                                const typedLangData = langData as AnimalLanguageData;
+                                return typedLangData.personality;
+                              }
+                            }
+                            return result.personality;
+                          })()}
                         </p>
                       </div>
                       <div>
                         <h4 className="font-bold text-gray-900">{t.traits}</h4>
                         <p className="text-gray-600">
-                          {language === 'en' && ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES]?.en?.charm
-                            ? ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES].en.charm
-                            : result.charm}
+                          {(() => {
+                            const animalData = ANIMAL_PERSONALITIES[getAnimalTypeInKorean(result.animalType) as keyof typeof ANIMAL_PERSONALITIES];
+                            if (!animalData) return result.charm;
+                            
+                            if (language !== 'ko') {
+                              const langData = animalData[language];
+                              if (langData && typeof langData === 'object' && 'charm' in langData) {
+                                const typedLangData = langData as AnimalLanguageData;
+                                return typedLangData.charm;
+                              }
+                            }
+                            return result.charm;
+                          })()}
                         </p>
                       </div>
                       <div>
                         <h4 className="font-bold text-gray-900">{t.description}</h4>
                         <p className="text-gray-600">
-                          {language === 'en' && ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES]?.en?.dating
-                            ? ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES].en.dating
-                            : result.dating}
+                          {(() => {
+                            const animalData = ANIMAL_PERSONALITIES[getAnimalTypeInKorean(result.animalType) as keyof typeof ANIMAL_PERSONALITIES];
+                            if (!animalData) return result.dating;
+                            
+                            if (language !== 'ko') {
+                              const langData = animalData[language];
+                              if (langData && typeof langData === 'object' && 'dating' in langData) {
+                                const typedLangData = langData as AnimalLanguageData;
+                                return typedLangData.dating;
+                              }
+                            }
+                            return result.dating;
+                          })()}
                         </p>
                       </div>
                     </div>

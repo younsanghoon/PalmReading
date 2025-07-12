@@ -1,0 +1,45 @@
+# 동물상 테스트 기능 분석
+
+## 동물상 테스트 구조
+- `client/src/components/personality-tests/animal-face-test.tsx`: 동물상 테스트 UI 컴포넌트
+- `client/src/lib/ai-models.ts`: AI 모델 관련 기능 (예측, 모델 로드 등)
+- `client/src/lib/personality-data.ts`: 동물상별 성격 데이터 정의
+- `client/src/hooks/use-teachable-machine.ts`: Teachable Machine 모델 사용을 위한 훅
+
+## 동물상 테스트 작동 방식
+1. 사용자가 이미지 업로드 또는 카메라로 촬영
+2. 업로드된 이미지를 Teachable Machine 모델로 분석
+3. 모델이 각 동물상(dog, cat, rabbit 등)에 대한 확률 반환
+4. 가장 높은 확률의 동물상을 결과로 표시
+5. 해당 동물상에 맞는 성격 정보를 `personality-data.ts`에서 가져와 표시
+
+## 모델 처리 과정
+- 모델 URL: `/PalmReading/attached_assets/model_1752161703239.json`
+- 메타데이터 URL: `/PalmReading/attached_assets/metadata_1752161703239.json`
+- 모델 로드 실패 시 `generateFallbackPredictions` 함수로 대체 결과 생성
+- 모델은 영어 클래스명(dog, cat 등)을 사용하지만, UI에는 한글로 변환하여 표시
+
+## 동물상 클래스 매핑
+- 'dog': '강아지상'
+- 'cat': '고양이상'
+- 'rabbit': '토끼상'
+- 'dinosaur': '공룡상'
+- 'bear': '곰상'
+- 'deer': '사슴상'
+- 'fox': '여우상'
+
+## 발견된 문제점
+1. `generateFallbackPredictions` 함수에서 동물상 클래스 목록이 한글로 잘못 설정되어 있었음
+2. 영어 클래스명과 한글 표시 간의 변환 로직이 없어 결과가 영어로 표시되는 문제 발생
+3. 이로 인해 동물상 정보를 가져올 때 매칭이 되지 않아 기본 정보만 표시됨
+
+## 해결 방안
+1. `generateFallbackPredictions` 함수의 동물상 클래스 목록을 영어로 수정
+2. 영어 클래스명을 한글로 변환하는 `getAnimalTypeInKorean` 함수 추가
+3. UI에 표시되는 모든 동물상 관련 부분에 변환 함수 적용
+4. 동물상 정보를 가져올 때도 한글로 변환된 동물상 사용
+
+## 추가 개선 가능 사항
+1. 동물상 클래스 매핑을 중앙 관리하여 일관성 유지
+2. 다국어 지원을 위한 동물상 이름 번역 기능 강화
+3. 모델 로드 실패 시 사용자에게 적절한 안내 메시지 제공 
