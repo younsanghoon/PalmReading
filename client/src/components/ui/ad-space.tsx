@@ -12,13 +12,24 @@ export function AdSpace({ type, className, position = 'center' }: AdSpaceProps) 
 
   useEffect(() => {
     // Google AdSense 광고 로드
+    console.log(`[AdSpace] Attempting to load ad type: ${type}`);
+    console.log(`[AdSpace] adsbygoogle available:`, !!(window as any).adsbygoogle);
+    
     if (type !== 'affiliate' && adRef.current && (window as any).adsbygoogle) {
       try {
+        console.log(`[AdSpace] Pushing ad to adsbygoogle`);
         (window as any).adsbygoogle = (window as any).adsbygoogle || [];
         (window as any).adsbygoogle.push({});
+        console.log(`[AdSpace] Ad push completed`);
       } catch (error) {
         console.error('AdSense error:', error);
       }
+    } else {
+      console.log(`[AdSpace] Conditions not met for ad loading:`, {
+        isAffiliate: type === 'affiliate',
+        hasAdRef: !!adRef.current,
+        hasAdsbygoogle: !!(window as any).adsbygoogle
+      });
     }
   }, [type]);
 
@@ -55,6 +66,22 @@ export function AdSpace({ type, className, position = 'center' }: AdSpaceProps) 
     }
   };
 
+  // 광고 타입에 따른 슬롯 ID 반환
+  const getAdSlot = () => {
+    switch (type) {
+      case 'banner':
+        return '7259870977';
+      case 'rectangle':
+        return '6737604370';
+      case 'skyscraper':
+        return '5414337776';
+      case 'mobile':
+        return '3991071178';
+      default:
+        return '6737604370'; // 기본값은 rectangle
+    }
+  };
+
   if (type === 'affiliate') {
     return (
       <div className={cn("flex flex-col items-center p-4", getPositionClasses(), className)}>
@@ -88,14 +115,15 @@ export function AdSpace({ type, className, position = 'center' }: AdSpaceProps) 
       <div 
         ref={adRef}
         className={cn(
-          getSizeClasses()
+          getSizeClasses(),
+          "border border-gray-200 dark:border-gray-700" // 디버깅을 위한 테두리 추가
         )}
       >
         <ins
           className="adsbygoogle"
           style={{ display: "block", width: "100%", height: "100%" }}
           data-ad-client="ca-pub-6706508307630636"
-          data-ad-slot="1234567890"
+          data-ad-slot={getAdSlot()}
           data-ad-format="auto"
           data-full-width-responsive="true"
         ></ins>
