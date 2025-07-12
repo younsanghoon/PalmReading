@@ -51,7 +51,7 @@ export default function Home() {
 
   // 손금 테스트 관련 텍스트
   const pageTitle = "손금 테스트";
-  const pageDescription = "AI로 알아보는 나의 운명. 손금으로 보는 미래, 성격, 재물운, 건강운, 사랑운을 확인해보세요.";
+  const pageDescription = "여러가지 나의 모습을 테스트";
   const footerTitle = "손금 테스트";
   const footerDescription = "AI 기반 손금 분석으로 나의 운명을 확인하세요";
   const copyright = "© 2024 손금 테스트. 모든 권리 보유.";

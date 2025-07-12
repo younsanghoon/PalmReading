@@ -3,26 +3,32 @@ import { Link } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdSpace } from "@/components/ui/ad-space";
+import { LanguageSelector } from "@/components/ui/language-selector";
 import { MBTITest } from "@/components/personality-tests/mbti-test";
+import { useLanguage } from "@/lib/i18n";
 
 export default function MBTITestPage() {
   const [isTestOpen, setIsTestOpen] = useState(false);
+  const { t } = useLanguage();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
       {/* Top Ad Banner */}
       <div className="w-full py-4 bg-white dark:bg-gray-900 border-b">
-        <AdSpace type="banner" className="px-4" />
+        <div className="flex justify-between items-center px-4">
+          <AdSpace type="banner" />
+          <LanguageSelector />
+        </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Navigation */}
           <div className="flex items-center gap-4 mb-8">
-            <Link href="/">
+            <Link href="/PalmReading/">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                홈으로
+                {t.home}
               </Button>
             </Link>
           </div>
@@ -38,10 +44,10 @@ export default function MBTITestPage() {
             <div className="flex-1 space-y-8">
               <div className="text-center">
                 <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                  MBTI 성격 유형 테스트
+                  {t.mbtiTitle}
                 </h1>
                 <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-                  16가지 성격 유형 중 나의 유형을 찾아보세요
+                  {t.mbtiTestDesc}
                 </p>
               </div>
 
@@ -52,7 +58,7 @@ export default function MBTITestPage() {
 
               {/* Test Description */}
               <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
-                <h2 className="text-2xl font-semibold mb-4">테스트 안내</h2>
+                <h2 className="text-2xl font-semibold mb-4">{t.mbtiDescription}</h2>
                 <div className="space-y-4 text-gray-600 dark:text-gray-300">
                   <p>• 총 40개의 질문으로 구성된 정밀한 MBTI 테스트</p>
                   <p>• 외향성(E) vs 내향성(I)</p>
@@ -72,7 +78,7 @@ export default function MBTITestPage() {
                   onClick={() => setIsTestOpen(true)}
                   className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white px-8 py-3 text-lg"
                 >
-                  테스트 시작하기
+                  {t.start}
                 </Button>
               </div>
             </div>

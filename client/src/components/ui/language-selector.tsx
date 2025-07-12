@@ -14,6 +14,16 @@ export function LanguageSelector() {
   const [isOpen, setIsOpen] = useState(false);
 
   const currentLanguage = languageOptions.find(lang => lang.code === language);
+  
+  const handleLanguageChange = (langCode: Language) => {
+    changeLanguage(langCode);
+    setIsOpen(false);
+    
+    // 언어 변경 후 페이지 새로고침
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
+  };
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -32,10 +42,7 @@ export function LanguageSelector() {
         {languageOptions.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => {
-              changeLanguage(lang.code);
-              setIsOpen(false);
-            }}
+            onClick={() => handleLanguageChange(lang.code)}
             className={`flex items-center gap-3 cursor-pointer ${
               language === lang.code ? 'bg-blue-50 dark:bg-blue-900/20' : ''
             }`}
