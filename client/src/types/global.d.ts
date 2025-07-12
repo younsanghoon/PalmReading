@@ -7,7 +7,7 @@ interface CameraCaptureOptions {
   captureButton: HTMLButtonElement | null;
   switchButton: HTMLButtonElement | null;
   cameraSelect: HTMLSelectElement | null;
-  onPhotoCapture?: (dataUrl: string) => void;
+  onPhotoCapture: (dataUrl: string) => void;
 }
 
 interface CameraCapture {

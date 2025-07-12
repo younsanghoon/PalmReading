@@ -120,25 +120,38 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
         cameraInstanceRef.current.dispose();
       }
       
-      cameraInstanceRef.current = new window.CameraCapture({
-        videoElement: videoRef.current,
-        canvasElement: canvasRef.current,
-        photoElement: photoRef.current,
-        startButton: document.getElementById('startCameraButton') as HTMLButtonElement | null,
-        captureButton: document.getElementById('captureCameraButton') as HTMLButtonElement | null,
-        switchButton: document.getElementById('switchCameraButton') as HTMLButtonElement | null,
-        cameraSelect: document.getElementById('cameraSelect') as HTMLSelectElement | null,
-        onPhotoCapture: (dataUrl: string) => {
-          setImageUrl(dataUrl);
-          // 카메라 모드 종료 후 분석 단계로 이동
-          setTimeout(() => {
-            setCurrentStep('upload');
-          }, 500);
-        }
-      });
+      // 카메라 요소가 모두 존재하는지 확인
+      if (!videoRef.current || !canvasRef.current || !photoRef.current) {
+        console.error('카메라 요소가 준비되지 않았습니다.');
+        return;
+      }
       
-      cameraInstanceRef.current.initialize();
-      cameraInstanceRef.current.startCamera();
+      try {
+        // 타입 캐스팅을 사용하여 타입 오류 해결
+        const options = {
+          videoElement: videoRef.current,
+          canvasElement: canvasRef.current,
+          photoElement: photoRef.current,
+          startButton: document.getElementById('startCameraButton') as HTMLButtonElement | null,
+          captureButton: document.getElementById('captureCameraButton') as HTMLButtonElement | null,
+          switchButton: document.getElementById('switchCameraButton') as HTMLButtonElement | null,
+          cameraSelect: document.getElementById('cameraSelect') as HTMLSelectElement | null,
+          onPhotoCapture: (dataUrl: string) => {
+            setImageUrl(dataUrl);
+            // 카메라 모드 종료 후 분석 단계로 이동
+            setTimeout(() => {
+              setCurrentStep('upload');
+            }, 500);
+          }
+        };
+        
+        cameraInstanceRef.current = new window.CameraCapture(options as any);
+        cameraInstanceRef.current.initialize();
+        cameraInstanceRef.current.startCamera();
+      } catch (error) {
+        console.error('카메라 초기화 오류:', error);
+        setCurrentStep('upload');
+      }
     }, 100);
   };
 

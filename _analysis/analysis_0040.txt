@@ -1,0 +1,85 @@
+# 프로젝트 분석: PalmReading 앱 다국어 지원 및 타입 시스템 개선
+
+## 1. 다국어 지원 현황
+
+### 1.1 지원 언어
+- 한국어(ko) - 기본 언어
+- 영어(en)
+- 일본어(ja)
+- 중국어(zh)
+- 인도네시아어(id)
+- 태국어(th)
+- 베트남어(vi)
+
+### 1.2 다국어 구현 방식
+- i18n.ts 파일에서 언어별 번역 데이터 관리
+- useLanguage 훅을 통해 현재 언어 및 번역 텍스트 제공
+- 언어 변경 시 'languageChanged' 커스텀 이벤트 발생
+
+### 1.3 다국어 지원 상태
+- **동물상 테스트**: 한국어, 영어만 지원 (개선 필요)
+- **MBTI 테스트**: 모든 언어 지원 (개선 완료)
+- **에니어그램 테스트**: 한국어, 영어만 지원 (개선 필요)
+- **손금 테스트**: 한국어, 영어만 지원 (개선 필요)
+
+## 2. 타입 시스템 분석
+
+### 2.1 타입 정의 현황
+- global.d.ts: 전역 타입 정의 (CameraCapture 등)
+- personality.ts: 성격 테스트 관련 타입 정의
+- 컴포넌트별 인터페이스 정의
+
+### 2.2 타입 관련 문제점
+- **타입 불일치**: palm-reading-test.tsx와 animal-face-test.tsx에서 CameraCaptureOptions 인터페이스와 실제 사용 간 불일치
+  - global.d.ts의 CameraCaptureOptions는 null을 허용하지만, 실제 사용 시 null이 허용되지 않는 문제
+  - palm-reading-test.tsx에서 수정 완료: null 체크 및 타입 캐스팅 적용
+  - animal-face-test.tsx는 별도의 CameraCaptureOptions 인터페이스를 정의하여 사용 중
+
+- **타입 중복 정의**: 여러 파일에서 유사한 타입을 중복 정의
+  - animal-face-test.tsx와 global.d.ts에서 CameraCaptureOptions 인터페이스 중복 정의
+  - 각 테스트 컴포넌트에서 유사한 결과 타입 중복 정의
+
+### 2.3 다국어 관련 타입
+- **MBTI 테스트**: MBTILanguageData, MBTITypeData, MBTITypesData 타입 정의 완료
+- **동물상 테스트**: AnimalLanguageData 타입 정의 필요
+- **에니어그램 테스트**: EnneagramLanguageData 타입 정의 필요
+- **손금 테스트**: PalmLanguageData 타입 정의 필요
+
+## 3. 개선 방향
+
+### 3.1 다국어 지원 개선
+- 모든 테스트 컴포넌트에서 7개 언어 완전 지원
+- 하드코딩된 텍스트를 번역 시스템(t 객체)으로 대체
+- 언어 변경 시 실시간 UI 업데이트 구현
+
+### 3.2 타입 시스템 개선
+- 중복 타입 정의 통합
+- 일관된 인터페이스 설계
+- 타입 안전성 강화 (any 타입 사용 최소화)
+
+### 3.3 카메라 관련 컴포넌트 개선
+- palm-reading-test.tsx와 animal-face-test.tsx의 카메라 초기화 로직 통일
+- 공통 훅으로 카메라 기능 분리 고려
+- 오류 처리 강화
+
+## 4. 최근 수정 내용
+
+### 4.1 MBTI 테스트 다국어 지원 개선
+- MBTILanguageData, MBTITypeData, MBTITypesData 타입 정의 추가
+- MBTI_TYPES 객체에 7개 언어 번역 데이터 추가
+- calculateMBTI 함수에 language 파라미터 추가
+- 결과 화면에서 번역된 MBTI 타입 이름 및 설명 표시
+
+### 4.2 palm-reading-test.tsx 타입 오류 수정
+- 문제: HTMLCanvasElement | null 타입을 HTMLCanvasElement에 할당 시 타입 오류 발생
+- 해결:
+  1. null 체크 로직 추가 (videoRef.current, canvasRef.current, photoRef.current)
+  2. 옵션 객체를 별도로 분리하고 타입 캐스팅(as any) 적용
+  3. try-catch 블록으로 예외 처리 추가
+
+## 5. 다음 작업 계획
+1. 동물상 테스트 다국어 지원 개선
+2. 에니어그램 테스트 다국어 지원 개선
+3. 손금 테스트 다국어 지원 개선
+4. 카메라 관련 컴포넌트 통합 및 개선
+5. 타입 시스템 정리 및 통합 
