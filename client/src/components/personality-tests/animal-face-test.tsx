@@ -1,23 +1,61 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { ResultChart } from "@/components/ui/result-chart";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Camera, Upload, Share2 } from "lucide-react";
 import { useImageUpload } from "@/hooks/use-image-upload";
 import { useTeachableMachine } from "@/hooks/use-teachable-machine";
-import { ANIMAL_PERSONALITIES } from "@/lib/personality-data";
-import { Camera, Upload, Share2, RotateCcw, Users } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { ResultChart } from "@/components/ui/result-chart";
 import { useLanguage } from "@/lib/i18n";
+import { ANIMAL_PERSONALITIES } from "@/lib/personality-data";
+import type { ModelPrediction } from "@/lib/ai-models";
+
+// 카메라 캡처 타입 정의
+interface CameraCapture {
+  start: () => void;
+  stop: () => void;
+}
+
+interface CameraCaptureOptions {
+  videoElement: HTMLVideoElement;
+  canvasElement: HTMLCanvasElement;
+  photoElement: HTMLImageElement;
+  selectElement: HTMLSelectElement | null;
+  startButton: HTMLButtonElement | null;
+  captureButton: HTMLButtonElement | null;
+  switchButton: HTMLButtonElement | null;
+  onCaptured: (dataUrl: string) => void;
+  onError: (error: Error) => void;
+}
+
+// 전역으로 CameraCapture 타입 선언
+declare global {
+  interface Window {
+    CameraCapture: {
+      new (options: CameraCaptureOptions): CameraCapture;
+    };
+  }
+}
 
 interface AnimalFaceTestProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+interface AnimalResult {
+  animalType: string;
+  confidence: number;
+  personality: string;
+  charm: string;
+  dating: string;
+  traits: string[];
+  predictions: ModelPrediction[];
+}
+
 export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
   const [currentStep, setCurrentStep] = useState<'upload' | 'camera' | 'analyzing' | 'result'>('upload');
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<AnimalResult | null>(null);
   const [modelLoaded, setModelLoaded] = useState(false);
   const { t, language } = useLanguage();
   
@@ -25,7 +63,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const photoRef = useRef<HTMLImageElement>(null);
-  const cameraInstanceRef = useRef<any>(null);
+  const cameraInstanceRef = useRef<CameraCapture | null>(null);
   
   const { 
     imageUrl, 
@@ -77,192 +115,117 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
     };
   }, [result]);
 
-  // 카메라 스크립트 로드
-  useEffect(() => {
-    // 스크립트가 이미 로드되었는지 확인
-    if (!document.getElementById('camera-capture-script')) {
-      // CSS 로드
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = '/PalmReading/camera-capture.css';
-      document.head.appendChild(link);
-      
-      // JS 로드
-      const script = document.createElement('script');
-      script.id = 'camera-capture-script';
-      script.src = '/PalmReading/camera-capture.js';
-      script.async = true;
-      document.body.appendChild(script);
-    }
-    
-    // 컴포넌트 언마운트 시 리소스 정리
-    return () => {
-      if (cameraInstanceRef.current) {
-        cameraInstanceRef.current.dispose();
-        cameraInstanceRef.current = null;
-      }
-    };
-  }, []);
-
   // 카메라 초기화
   const initCamera = () => {
     setCurrentStep('camera');
     
-    // 다음 렌더링 사이클에서 카메라 초기화
-    setTimeout(() => {
-      if (!window.CameraCapture) {
-        console.error('카메라 스크립트가 로드되지 않았습니다.');
-        return;
-      }
-      
-      if (cameraInstanceRef.current) {
-        cameraInstanceRef.current.dispose();
-      }
-      
-      cameraInstanceRef.current = new window.CameraCapture({
-        videoElement: videoRef.current,
-        canvasElement: canvasRef.current,
-        photoElement: photoRef.current,
-        startButton: document.getElementById('startCameraButton') as HTMLButtonElement,
-        captureButton: document.getElementById('captureCameraButton') as HTMLButtonElement,
-        switchButton: document.getElementById('switchCameraButton') as HTMLButtonElement,
-        cameraSelect: document.getElementById('cameraSelect') as HTMLSelectElement,
-        onPhotoCapture: (dataUrl: string) => {
-          setImageUrl(dataUrl);
-          // 카메라 모드 종료 후 분석 단계로 이동
-          setTimeout(() => {
-            setCurrentStep('upload');
-          }, 500);
-        }
-      });
-      
-      cameraInstanceRef.current.initialize();
-      cameraInstanceRef.current.startCamera();
-    }, 100);
-  };
-
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      await uploadImage(file);
+    // 이미 카메라 인스턴스가 있으면 제거
+    if (cameraInstanceRef.current) {
+      cameraInstanceRef.current.stop();
+      cameraInstanceRef.current = null;
     }
-  };
-
-  const handleAnalyze = async () => {
-    const imageElement = await createImageElement();
-    if (!imageElement) {
-      console.error('[AnimalFaceTest] Failed to create image element');
-      alert(t.imageRequired);
-      return;
-    }
-
-    setCurrentStep('analyzing');
     
-    try {
-      console.log('[AnimalFaceTest] Starting analysis');
-      const predictions = await predictAnimal(imageElement);
-      console.log('[AnimalFaceTest] Predictions received:', predictions);
-      
-      if (predictions && predictions.length > 0) {
-        // Find the highest probability result
-        const topPrediction = predictions.reduce((max, pred) => 
-          pred.probability > max.probability ? pred : max
-        , predictions[0]);
-        
-        const animalType = topPrediction.className;
-        console.log('[AnimalFaceTest] Top prediction:', { animalType, confidence: topPrediction.probability });
-        
-        // 동물 유형이 ANIMAL_PERSONALITIES에 있는지 확인
-        if (!Object.keys(ANIMAL_PERSONALITIES).includes(animalType)) {
-          console.error('[AnimalFaceTest] Unknown animal type:', animalType);
-          // 대체 동물 유형 사용
-          const fallbackAnimalType = Object.keys(ANIMAL_PERSONALITIES)[0];
-          console.warn(`[AnimalFaceTest] Using fallback animal type: ${fallbackAnimalType}`);
-          
-          const resultData = {
-            animalType: fallbackAnimalType,
-            confidence: topPrediction.probability * 100,
-            predictions,
-            ...ANIMAL_PERSONALITIES[fallbackAnimalType as keyof typeof ANIMAL_PERSONALITIES]
-          };
-          
-          setResult(resultData);
-          setCurrentStep('result');
+    // 카메라 기능 초기화
+    if (typeof window !== 'undefined' && videoRef.current && canvasRef.current && photoRef.current) {
+      // 카메라 캡처 스크립트 로드
+      const script = document.createElement('script');
+      script.src = '/PalmReading/camera-capture.js';
+      script.onload = () => {
+        if (!window.CameraCapture) {
+          console.error('CameraCapture not found in window');
           return;
         }
         
-        const personality = ANIMAL_PERSONALITIES[animalType as keyof typeof ANIMAL_PERSONALITIES];
-        
-        if (!personality) {
-          console.error('[AnimalFaceTest] No personality data for animal type:', animalType);
-          throw new Error(`No personality data for ${animalType}`);
-        }
-        
-        const resultData = {
-          animalType,
-          confidence: topPrediction.probability * 100,
-          predictions,
-          ...personality
+        const cameraOptions: CameraCaptureOptions = {
+          videoElement: videoRef.current!,
+          canvasElement: canvasRef.current!,
+          photoElement: photoRef.current!,
+          selectElement: document.getElementById('cameraSelect') as HTMLSelectElement,
+          startButton: document.getElementById('startCameraButton') as HTMLButtonElement,
+          captureButton: document.getElementById('captureCameraButton') as HTMLButtonElement,
+          switchButton: document.getElementById('switchCameraButton') as HTMLButtonElement,
+          onCaptured: (dataUrl: string) => {
+            setImageUrl(dataUrl);
+            setCurrentStep('upload');
+          },
+          onError: (error: Error) => {
+            console.error('Camera error:', error);
+            setCurrentStep('upload');
+          }
         };
         
-        console.log('[AnimalFaceTest] Setting result:', resultData);
-        setResult(resultData);
-        
-        // Save to localStorage
-        const results = JSON.parse(localStorage.getItem('personalityResults') || '{}');
-        results.animal = {
-          result: animalType,
-          confidence: topPrediction.probability * 100,
-          timestamp: new Date().toISOString()
-        };
-        localStorage.setItem('personalityResults', JSON.stringify(results));
-        
-        setCurrentStep('result');
-      } else {
-        console.error('[AnimalFaceTest] No predictions returned or empty predictions array');
-        // 대체 결과 생성
-        const fallbackAnimalType = Object.keys(ANIMAL_PERSONALITIES)[0];
-        console.warn(`[AnimalFaceTest] Using fallback animal type: ${fallbackAnimalType}`);
-        
-        const fallbackPredictions = [
-          { className: fallbackAnimalType, probability: 0.8 },
-          { className: Object.keys(ANIMAL_PERSONALITIES)[1], probability: 0.2 }
-        ];
-        
-        const resultData = {
-          animalType: fallbackAnimalType,
-          confidence: 80,
-          predictions: fallbackPredictions,
-          ...ANIMAL_PERSONALITIES[fallbackAnimalType as keyof typeof ANIMAL_PERSONALITIES]
-        };
-        
-        setResult(resultData);
-        setCurrentStep('result');
-      }
-    } catch (error) {
-      console.error('[AnimalFaceTest] Analysis error:', error);
-      
-      // 오류 발생 시에도 결과 화면으로 이동하도록 대체 결과 생성
-      const fallbackAnimalType = Object.keys(ANIMAL_PERSONALITIES)[0];
-      console.warn(`[AnimalFaceTest] Using fallback animal type due to error: ${fallbackAnimalType}`);
-      
-      const fallbackPredictions = [
-        { className: fallbackAnimalType, probability: 0.8 },
-        { className: Object.keys(ANIMAL_PERSONALITIES)[1], probability: 0.2 }
-      ];
-      
-      const resultData = {
-        animalType: fallbackAnimalType,
-        confidence: 80,
-        predictions: fallbackPredictions,
-        ...ANIMAL_PERSONALITIES[fallbackAnimalType as keyof typeof ANIMAL_PERSONALITIES]
+        cameraInstanceRef.current = new window.CameraCapture(cameraOptions);
+        cameraInstanceRef.current.start();
       };
       
-      setResult(resultData);
-      setCurrentStep('result');
+      script.onerror = (err) => {
+        console.error('Failed to load camera script:', err);
+        setCurrentStep('upload');
+      };
+      
+      document.body.appendChild(script);
     }
   };
 
+  // 이미지 업로드 처리
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      await uploadImage(event.target.files[0]);
+    }
+  };
+
+  // 이미지 분석 처리
+  const handleAnalyze = async () => {
+    if (!imageUrl || !modelLoaded) return;
+    
+    setCurrentStep('analyzing');
+    
+    try {
+      // 이미지 요소 생성
+      const imageElement = await createImageElement(imageUrl);
+      
+      // 동물상 예측
+      if (imageElement) {
+        const predictions = await predictAnimal(imageElement);
+        
+        if (predictions && predictions.length > 0) {
+          // 가장 높은 확률의 예측 찾기
+          const topPrediction = predictions.reduce((max, pred) => 
+            pred.probability > max.probability ? pred : max, predictions[0]);
+          
+          const animalType = topPrediction.className;
+          const confidence = topPrediction.probability * 100;
+          
+          // 동물상에 따른 성격 정보 가져오기
+          const animalInfo = ANIMAL_PERSONALITIES[animalType as keyof typeof ANIMAL_PERSONALITIES] || {
+            traits: ['특징 정보 없음'],
+            description: '정보가 없습니다',
+            personality: '성격 정보가 없습니다',
+            charm: '매력 정보가 없습니다',
+            dating: '연애 정보가 없습니다'
+          };
+          
+          // 결과 설정
+          setResult({
+            animalType,
+            confidence,
+            personality: animalInfo.personality,
+            charm: animalInfo.charm,
+            dating: animalInfo.dating,
+            traits: animalInfo.traits,
+            predictions
+          });
+          
+          setCurrentStep('result');
+        }
+      }
+    } catch (error) {
+      console.error('Analysis error:', error);
+      setCurrentStep('upload');
+    }
+  };
+
+  // 초기화 함수
   const handleReset = () => {
     setCurrentStep('upload');
     setResult(null);
@@ -270,83 +233,66 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
     
     // 카메라 인스턴스 정리
     if (cameraInstanceRef.current) {
-      cameraInstanceRef.current.dispose();
+      cameraInstanceRef.current.stop();
       cameraInstanceRef.current = null;
     }
   };
 
+  // 결과 공유 함수
   const handleShare = async () => {
-    if (navigator.share) {
-      try {
+    if (!result) return;
+    
+    const shareText = `내 동물상 결과: ${result.animalType} (${result.confidence.toFixed(1)}%)\n${window.location.href}`;
+    
+    try {
+      if (navigator.share) {
         await navigator.share({
-          title: t.animalResult,
-          text: `${t.animalResult}: ${result.animalType}`,
+          title: '동물상 테스트 결과',
+          text: shareText,
           url: window.location.href
         });
-      } catch (err) {
-        console.log('Sharing failed:', err);
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        alert('클립보드에 복사되었습니다.');
       }
-    } else {
-      // Fallback: copy to clipboard
-      try {
-        await navigator.clipboard.writeText(window.location.href);
-        alert(language === 'ko' ? '링크가 클립보드에 복사되었습니다!' : 'Link copied to clipboard!');
-      } catch (err) {
-        console.log('Copy failed:', err);
-      }
+    } catch (error) {
+      console.error('Share failed:', error);
     }
   };
 
+  // 차트 데이터 생성
   const getChartData = () => {
     if (!result?.predictions) return null;
     
     return {
-      labels: result.predictions.map((p: any) => p.className),
-      datasets: [{
-        label: language === 'ko' ? '확률 (%)' : 'Probability (%)',
-        data: result.predictions.map((p: any) => (p.probability * 100).toFixed(1)),
-        backgroundColor: [
-          '#6366f1', '#ec4899', '#f59e0b', '#10b981', '#8b5cf6', '#f97316'
-        ],
-        borderWidth: 1
-      }]
+      labels: result.predictions.map((p: ModelPrediction) => p.className),
+      datasets: [
+        {
+          label: t.animalResult,
+          data: result.predictions.map((p: ModelPrediction) => (p.probability * 100).toFixed(1)),
+          backgroundColor: 'rgba(147, 51, 234, 0.5)',
+          borderColor: 'rgb(147, 51, 234)',
+          borderWidth: 1
+        }
+      ]
     };
   };
 
+  // 동물상 궁합 정보
   const getAnimalCompatibility = (animalType: string) => {
     const compatibilityData: Record<string, { best: string[], good: string[], description: string }> = {
-      '강아지상': {
-        best: ['고양이상', '곰상', 'ESFJ', 'ISFJ', '에겐남', '에겐녀'],
-        good: ['토끼상', '여우상', 'ENFP', 'ESFP', '테토남', '테토녀'],
-        description: '강아지상은 충성스럽고 친근한 성격으로 안정적이고 따뜻한 상대와 잘 어울립니다.'
+      강아지상: {
+        best: ['고양이상', '토끼상'],
+        good: ['곰상'],
+        description: '강아지상은 고양이상, 토끼상과 최고의 궁합을 이룹니다.'
       },
-      '고양이상': {
-        best: ['강아지상', '여우상', 'INFJ', 'INTJ', '테토남', '테토녀'],
-        good: ['곰상', '원숭이상', 'ISFP', 'INFP', '에겐남', '에겐녀'],
-        description: '고양이상은 독립적이고 신비로운 매력으로 이해심 깊은 상대와 깊은 유대를 형성합니다.'
-      },
-      '곰상': {
-        best: ['토끼상', '강아지상', 'ISFJ', 'ESFJ', '테토남', '테토녀'],
-        good: ['고양이상', '여우상', 'INFP', 'ENFP', '에겐남', '에겐녀'],
-        description: '곰상은 든든하고 포용력 있는 성격으로 순수하고 따뜻한 마음과 조화를 이룹니다.'
-      },
-      '여우상': {
-        best: ['원숭이상', '고양이상', 'ENTP', 'ENFJ', '에겐남', '에겐녀'],
-        good: ['강아지상', '곰상', 'INTJ', 'INFJ', '테토남', '테토녀'],
-        description: '여우상은 영리하고 매혹적인 매력으로 창의적이고 지적인 상대와 흥미로운 관계를 만듭니다.'
-      },
-      '원숭이상': {
-        best: ['여우상', '토끼상', 'ENFP', 'ESFP', '에겐남', '에겐녀'],
-        good: ['강아지상', '고양이상', 'ENTP', 'ESTP', '테토남', '테토녀'],
-        description: '원숭이상은 재미있고 창의적인 성격으로 활발하고 유머러스한 상대와 즐거운 시간을 보냅니다.'
-      },
-      '토끼상': {
-        best: ['곰상', '원숭이상', 'ISFP', 'INFP', '테토남', '테토녀'],
-        good: ['강아지상', '고양이상', 'ISFJ', 'ESFJ', '에겐남', '에겐녀'],
-        description: '토끼상은 온순하고 섬세한 성격으로 보호받을 수 있는 안전한 관계를 선호합니다.'
+      고양이상: {
+        best: ['강아지상', '여우상'],
+        good: ['원숭이상'],
+        description: '고양이상은 강아지상, 여우상과 최고의 궁합을 이룹니다.'
       }
     };
-
+    
     return compatibilityData[animalType] || {
       best: ['모든 동물상'],
       good: ['모든 동물상'],
@@ -373,9 +319,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                 {t.uploadImage}
               </h3>
               <p className="text-gray-600">
-                {language === 'ko' 
-                  ? '정면을 바라보는 깔끔한 사진을 업로드하면 더 정확한 분석이 가능합니다.'
-                  : 'Upload a clear photo facing forward for more accurate analysis.'}
+                {t.animalTestDesc}
               </p>
             </div>
 
@@ -425,9 +369,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                   ) : !modelLoaded ? (
                     <>
                       <LoadingSpinner className="mr-2" />
-                      {t.loadingAIModel || (language === 'ko' 
-                      ? 'AI 모델을 로드하는 중입니다. 잠시만 기다려주세요.'
-                      : 'Loading AI model. Please wait a moment.')}
+                      {t.loadingAIModel}
                     </>
                   ) : (
                     t.start
@@ -435,9 +377,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                 </Button>
                 {!modelLoaded && (
                   <p className="text-sm text-gray-500 mt-2">
-                    {t.loadingAIModel || (language === 'ko' 
-                      ? 'AI 모델을 로드하는 중입니다. 잠시만 기다려주세요.'
-                      : 'Loading AI model. Please wait a moment.')}
+                    {t.loadingAIModel}
                   </p>
                 )}
               </div>
@@ -552,16 +492,6 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                             : result.dating}
                         </p>
                       </div>
-                      <div>
-                        <h4 className="font-bold text-gray-900">{t.compatibility}</h4>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {getAnimalCompatibility(result.animalType).best.map((type, i) => (
-                            <span key={i} className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-                              {type}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -569,19 +499,12 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
             </div>
 
             <div className="flex justify-center space-x-4">
-              <Button
-                onClick={handleShare}
-                variant="outline"
-              >
+              <Button onClick={handleReset} variant="outline">
+                {t.restart}
+              </Button>
+              <Button onClick={handleShare} className="bg-purple-600 hover:bg-purple-700">
                 <Share2 className="w-4 h-4 mr-2" />
                 {t.share}
-              </Button>
-              <Button
-                onClick={handleReset}
-                variant="outline"
-              >
-                <RotateCcw className="w-4 h-4 mr-2" />
-                {t.restart}
               </Button>
             </div>
           </div>

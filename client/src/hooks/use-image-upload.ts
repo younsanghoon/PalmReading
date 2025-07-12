@@ -7,7 +7,7 @@ interface UseImageUploadReturn {
   error: string | null;
   uploadImage: (file: File) => Promise<void>;
   clearImage: () => void;
-  createImageElement: () => Promise<HTMLImageElement | null>;
+  createImageElement: (url?: string) => Promise<HTMLImageElement | null>;
   setImageUrl: (url: string) => void;
 }
 
@@ -60,14 +60,15 @@ export function useImageUpload(): UseImageUploadReturn {
     setError(null);
   }, []);
 
-  const createImageElement = useCallback(async (): Promise<HTMLImageElement | null> => {
-    if (!imageUrl) return null;
+  const createImageElement = useCallback(async (url?: string): Promise<HTMLImageElement | null> => {
+    const imageSource = url || imageUrl;
+    if (!imageSource) return null;
 
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => resolve(img);
       img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = imageUrl;
+      img.src = imageSource;
     });
   }, [imageUrl]);
 

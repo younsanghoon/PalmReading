@@ -74,7 +74,7 @@ export function ResultChart({ data, type = 'bar', title, className }: ResultChar
   if (!data) {
     return (
       <div className={className}>
-        {t.loading || 'Loading data...'}
+        {t.loading}
       </div>
     );
   }
