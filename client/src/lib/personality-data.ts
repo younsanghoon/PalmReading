@@ -673,27 +673,87 @@ export const ENNEAGRAM_QUESTIONS: Question[] = [
 export const ANIMAL_PERSONALITIES = {
   강아지상: {
     traits: ['충성스러운', '친근한', '활발한', '사교적인', '순수한'],
-    description: '강아지상은 친근하고 충성스러운 성격으로 사람들에게 사랑받는 타입입니다. 밝고 긍정적인 에너지를 가지고 있어 주변 사람들을 행복하게 만듭니다.'
+    description: '강아지상은 친근하고 충성스러운 성격으로 사람들에게 사랑받는 타입입니다. 밝고 긍정적인 에너지를 가지고 있어 주변 사람들을 행복하게 만듭니다.',
+    personality: '친근하고 충성스러운 성격으로 사람들에게 사랑받는 타입입니다.',
+    charm: '밝고 긍정적인 에너지로 주변 사람들을 행복하게 만듭니다.',
+    dating: '안정적이고 따뜻한 관계를 추구하며 파트너에게 헌신적입니다.',
+    en: {
+      traits: ['Loyal', 'Friendly', 'Active', 'Social', 'Pure'],
+      description: 'Dog-faced people have a friendly and loyal personality that is loved by others. They have bright and positive energy that makes people around them happy.',
+      personality: 'You have a friendly and loyal personality that is loved by others.',
+      charm: 'Your bright and positive energy makes people around you happy.',
+      dating: 'You seek stable and warm relationships and are dedicated to your partner.'
+    }
   },
   고양이상: {
     traits: ['독립적인', '신비로운', '우아한', '선택적인', '자유로운'],
-    description: '고양이상은 독립적이고 신비로운 매력을 가진 타입입니다. 자신만의 기준이 확실하고 선택적으로 관계를 맺는 특징이 있습니다.'
+    description: '고양이상은 독립적이고 신비로운 매력을 가진 타입입니다. 자신만의 기준이 확실하고 선택적으로 관계를 맺는 특징이 있습니다.',
+    personality: '독립적이고 신비로운 매력을 가진 타입입니다.',
+    charm: '자신만의 기준이 확실하고 선택적으로 관계를 맺는 특징이 있습니다.',
+    dating: '상대방의 독립성을 존중하며 깊고 의미 있는 관계를 추구합니다.',
+    en: {
+      traits: ['Independent', 'Mysterious', 'Elegant', 'Selective', 'Free-spirited'],
+      description: 'Cat-faced people have an independent and mysterious charm. They have clear personal standards and are selective in forming relationships.',
+      personality: 'You have an independent and mysterious charm.',
+      charm: 'You have clear personal standards and are selective in forming relationships.',
+      dating: 'You respect your partner\'s independence and seek deep, meaningful relationships.'
+    }
   },
   곰상: {
     traits: ['든든한', '포용력 있는', '온화한', '보호적인', '안정적인'],
-    description: '곰상은 든든하고 포용력 있는 성격으로 주변 사람들에게 안정감을 주는 타입입니다. 온화하고 보호적인 성향이 강합니다.'
+    description: '곰상은 든든하고 포용력 있는 성격으로 주변 사람들에게 안정감을 주는 타입입니다. 온화하고 보호적인 성향이 강합니다.',
+    personality: '든든하고 포용력 있는 성격으로 주변 사람들에게 안정감을 줍니다.',
+    charm: '온화하고 보호적인 성향이 강해 신뢰감을 줍니다.',
+    dating: '안정적이고 믿음직한 관계를 형성하며 파트너를 보호하고 지원합니다.',
+    en: {
+      traits: ['Reliable', 'Inclusive', 'Gentle', 'Protective', 'Stable'],
+      description: 'Bear-faced people have a reliable and inclusive personality that gives stability to those around them. They have strong gentle and protective tendencies.',
+      personality: 'You have a reliable and inclusive personality that gives stability to those around you.',
+      charm: 'Your gentle and protective tendencies inspire trust in others.',
+      dating: 'You form stable and trustworthy relationships, protecting and supporting your partner.'
+    }
   },
   여우상: {
     traits: ['영리한', '매혹적인', '재치있는', '전략적인', '세련된'],
-    description: '여우상은 영리하고 매혹적인 매력을 가진 타입입니다. 뛰어난 재치와 전략적 사고로 상황을 잘 파악하고 대처합니다.'
+    description: '여우상은 영리하고 매혹적인 매력을 가진 타입입니다. 뛰어난 재치와 전략적 사고로 상황을 잘 파악하고 대처합니다.',
+    personality: '영리하고 매혹적인 매력을 가진 타입입니다.',
+    charm: '뛰어난 재치와 전략적 사고로 상황을 잘 파악하고 대처합니다.',
+    dating: '지적이고 흥미로운 관계를 추구하며 파트너에게 새로운 자극을 줍니다.',
+    en: {
+      traits: ['Smart', 'Charming', 'Witty', 'Strategic', 'Sophisticated'],
+      description: 'Fox-faced people have a smart and charming appeal. They understand and handle situations well with their outstanding wit and strategic thinking.',
+      personality: 'You have a smart and charming appeal.',
+      charm: 'You understand and handle situations well with your outstanding wit and strategic thinking.',
+      dating: 'You seek intellectual and interesting relationships, providing new stimulation to your partner.'
+    }
   },
   원숭이상: {
     traits: ['재미있는', '창의적인', '호기심 많은', '활동적인', '표현력 풍부한'],
-    description: '원숭이상은 재미있고 창의적인 성격으로 항상 새로운 것을 추구하는 타입입니다. 뛰어난 표현력과 호기심으로 주변을 즐겁게 만듭니다.'
+    description: '원숭이상은 재미있고 창의적인 성격으로 항상 새로운 것을 추구하는 타입입니다. 뛰어난 표현력과 호기심으로 주변을 즐겁게 만듭니다.',
+    personality: '재미있고 창의적인 성격으로 항상 새로운 것을 추구합니다.',
+    charm: '뛰어난 표현력과 호기심으로 주변을 즐겁게 만듭니다.',
+    dating: '활기차고 재미있는 관계를 추구하며 파트너에게 즐거움을 선사합니다.',
+    en: {
+      traits: ['Fun', 'Creative', 'Curious', 'Active', 'Expressive'],
+      description: 'Monkey-faced people have fun and creative personalities who always seek new things. They make their surroundings enjoyable with their outstanding expressiveness and curiosity.',
+      personality: 'You have a fun and creative personality and always seek new things.',
+      charm: 'You make your surroundings enjoyable with your outstanding expressiveness and curiosity.',
+      dating: 'You seek lively and fun relationships, bringing joy to your partner.'
+    }
   },
   토끼상: {
     traits: ['온순한', '섬세한', '평화로운', '배려심 깊은', '순수한'],
-    description: '토끼상은 온순하고 섬세한 성격으로 평화를 사랑하는 타입입니다. 배려심이 깊고 순수한 마음을 가지고 있어 사람들에게 편안함을 줍니다.'
+    description: '토끼상은 온순하고 섬세한 성격으로 평화를 사랑하는 타입입니다. 배려심이 깊고 순수한 마음을 가지고 있어 사람들에게 편안함을 줍니다.',
+    personality: '온순하고 섬세한 성격으로 평화를 사랑하는 타입입니다.',
+    charm: '배려심이 깊고 순수한 마음을 가지고 있어 사람들에게 편안함을 줍니다.',
+    dating: '조화롭고 평화로운 관계를 추구하며 파트너를 세심하게 배려합니다.',
+    en: {
+      traits: ['Gentle', 'Delicate', 'Peaceful', 'Considerate', 'Pure'],
+      description: 'Rabbit-faced people have gentle and delicate personalities who love peace. They have deep consideration and pure hearts that give comfort to people.',
+      personality: 'You have a gentle and delicate personality and love peace.',
+      charm: 'Your deep consideration and pure heart give comfort to people.',
+      dating: 'You seek harmonious and peaceful relationships, carefully considering your partner\'s needs.'
+    }
   }
 };
 

@@ -528,15 +528,27 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                     <div className="space-y-4">
                       <div>
                         <h4 className="font-bold text-gray-900">{t.personalityAnalysis}</h4>
-                        <p className="text-gray-600">{result.personality}</p>
+                        <p className="text-gray-600">
+                          {language === 'ko' 
+                            ? result.personality 
+                            : ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES]?.en?.personality || result.personality}
+                        </p>
                       </div>
                       <div>
                         <h4 className="font-bold text-gray-900">{t.traits}</h4>
-                        <p className="text-gray-600">{result.charm}</p>
+                        <p className="text-gray-600">
+                          {language === 'ko'
+                            ? result.charm
+                            : ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES]?.en?.charm || result.charm}
+                        </p>
                       </div>
                       <div>
                         <h4 className="font-bold text-gray-900">{t.description}</h4>
-                        <p className="text-gray-600">{result.dating}</p>
+                        <p className="text-gray-600">
+                          {language === 'ko'
+                            ? result.dating
+                            : ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES]?.en?.dating || result.dating}
+                        </p>
                       </div>
                       <div>
                         <h4 className="font-bold text-gray-900">{t.compatibility}</h4>
