@@ -8,6 +8,7 @@ import { useTeachableMachine } from "@/hooks/use-teachable-machine";
 import { Camera, Upload, Share2, RotateCcw, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { predictPalmReading } from "@/lib/ai-models";
+import { useLanguage } from "@/lib/i18n";
 
 interface PalmReadingTestProps {
   open: boolean;
@@ -18,6 +19,7 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
   const [currentStep, setCurrentStep] = useState<'upload' | 'camera' | 'analyzing' | 'result'>('upload');
   const [result, setResult] = useState<any>(null);
   const [modelLoaded, setModelLoaded] = useState(false);
+  const { t, language } = useLanguage();
   
   // 카메라 관련 상태 및 참조
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -45,6 +47,28 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
     model,
     predictPalm
   } = useTeachableMachine({ modelURL, metadataURL });
+
+  // 언어 변경 이벤트 리스너
+  useEffect(() => {
+    const handleLanguageChange = (event: Event) => {
+      console.log('[PalmReadingTest] Language change detected', (event as CustomEvent).detail);
+      // 결과가 있는 경우 결과 텍스트 업데이트
+      if (result) {
+        // 언어에 따른 결과 텍스트 업데이트 로직
+        const updatedResult = {
+          ...result,
+          // 필요한 경우 언어별 텍스트 업데이트
+        };
+        setResult(updatedResult);
+      }
+    };
+
+    window.addEventListener('languageChanged', handleLanguageChange);
+    
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange);
+    };
+  }, [result]);
 
   // 모델 로드 상태 체크
   useEffect(() => {
@@ -127,7 +151,10 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
 
   const handleAnalyze = async () => {
     const imageElement = await createImageElement();
-    if (!imageElement) return;
+    if (!imageElement) {
+      alert(t.imageRequired);
+      return;
+    }
 
     setCurrentStep('analyzing');
     
@@ -137,12 +164,14 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
       
       // Process palm reading results
       const palmResult = {
-        lifeLine: '강한 생명력과 건강한 체력을 나타냅니다.',
-        heartLine: '감정이 풍부하고 타인에 대한 배려가 깊습니다.',
-        headLine: '분석적 사고와 창의력이 뛰어납니다.',
-        fateLine: '목표 지향적이며 성취욕이 강합니다.',
-        abilityLine: '특별한 재능과 잠재력을 가지고 있습니다.',
-        overall: '전반적으로 균형 잡힌 성격으로 다양한 분야에서 성공할 수 있는 잠재력을 가지고 있습니다.',
+        lifeLine: language === 'ko' ? '강한 생명력과 건강한 체력을 나타냅니다.' : 'Shows strong vitality and healthy physical strength.',
+        heartLine: language === 'ko' ? '감정이 풍부하고 타인에 대한 배려가 깊습니다.' : 'Rich in emotions and deeply considerate of others.',
+        headLine: language === 'ko' ? '분석적 사고와 창의력이 뛰어납니다.' : 'Excellent analytical thinking and creativity.',
+        fateLine: language === 'ko' ? '목표 지향적이며 성취욕이 강합니다.' : 'Goal-oriented with strong desire for achievement.',
+        abilityLine: language === 'ko' ? '특별한 재능과 잠재력을 가지고 있습니다.' : 'Has special talents and potential.',
+        overall: language === 'ko' 
+          ? '전반적으로 균형 잡힌 성격으로 다양한 분야에서 성공할 수 있는 잠재력을 가지고 있습니다.' 
+          : 'Overall, you have a balanced personality with the potential to succeed in various fields.',
         predictions
       };
       
@@ -159,7 +188,7 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
       setCurrentStep('result');
     } catch (error) {
       console.error('[PalmReadingTest] Analysis error:', error);
-      alert('손금 분석에 실패했습니다. 다시 시도해 주세요.');
+      alert(t.analysisError);
       setCurrentStep('upload');
     }
   };
@@ -180,8 +209,8 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'AI 손금 분석 결과',
-          text: '나의 손금 분석 결과를 확인해보세요!',
+          title: language === 'ko' ? 'AI 손금 분석 결과' : 'AI Palm Reading Results',
+          text: language === 'ko' ? '나의 손금 분석 결과를 확인해보세요!' : 'Check out my palm reading results!',
           url: window.location.href
         });
       } catch (err) {
@@ -190,7 +219,7 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
     } else {
       try {
         await navigator.clipboard.writeText(window.location.href);
-        alert('링크가 클립보드에 복사되었습니다!');
+        alert(language === 'ko' ? '링크가 클립보드에 복사되었습니다!' : 'Link copied to clipboard!');
       } catch (err) {
         console.log('Copy failed:', err);
       }
@@ -201,9 +230,9 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
     if (!result) return null;
     
     return {
-      labels: ['생명선', '감정선', '지능선', '운명선', '능력선'],
+      labels: [t.lifeLine, t.heartLine, t.headLine, t.fateLine, t.abilityLine],
       datasets: [{
-        label: '특성 점수',
+        label: language === 'ko' ? '특성 점수' : 'Feature Score',
         data: [85, 92, 78, 88, 75], // Mock data for demonstration
         backgroundColor: [
           '#f59e0b', '#ec4899', '#6366f1', '#10b981', '#8b5cf6'
@@ -217,7 +246,9 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
     const compatibility = {
       best: ['곰상', '강아지상', 'ISFJ', 'ESFJ', '에겐남', '에겐녀'],
       good: ['고양이상', '토끼상', 'INFP', 'ENFP', '테토남', '테토녀'],
-      description: '손금 분석에 따르면 균형잡힌 성격으로 많은 유형과 좋은 관계를 형성할 수 있습니다. 특히 안정적이고 신뢰할 수 있는 상대와 깊은 유대를 형성하며, 감정적으로 성숙한 관계를 선호합니다.'
+      description: language === 'ko' 
+        ? '손금 분석에 따르면 균형잡힌 성격으로 많은 유형과 좋은 관계를 형성할 수 있습니다. 특히 안정적이고 신뢰할 수 있는 상대와 깊은 유대를 형성하며, 감정적으로 성숙한 관계를 선호합니다.'
+        : 'According to palm analysis, you have a balanced personality that can form good relationships with many types. You especially form deep bonds with stable and reliable partners, and prefer emotionally mature relationships.'
     };
     return compatibility;
   };
@@ -227,7 +258,7 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-gray-900">
-            AI 손금 분석
+            {t.palmTestTitle}
           </DialogTitle>
         </DialogHeader>
 
@@ -238,10 +269,10 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
                 <span className="text-3xl">🤚</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
-                손바닥 사진을 업로드하세요
+                {t.uploadPalmImage}
               </h3>
               <p className="text-gray-600">
-                손바닥을 편 상태로 선명하게 촬영해 주세요. 손금이 잘 보이도록 조명을 밝게 해주세요.
+                {t.palmImageInstructions}
               </p>
             </div>
 
@@ -252,14 +283,14 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
                 disabled={isUploading}
               >
                 <Upload className="w-4 h-4 mr-2" />
-                사진 업로드
+                {t.uploadImage}
               </Button>
               <Button
                 variant="outline"
                 onClick={initCamera}
               >
                 <Camera className="w-4 h-4 mr-2" />
-                사진 촬영
+                {t.takePhoto}
               </Button>
             </div>
 
@@ -286,19 +317,23 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
                   {isAnalyzing ? (
                     <>
                       <LoadingSpinner className="mr-2" />
-                      분석 중...
+                      {t.analyzing}
                     </>
                   ) : !modelLoaded ? (
                     <>
                       <LoadingSpinner className="mr-2" />
-                      모델 로딩 중...
+                      {t.loading}
                     </>
                   ) : (
-                    "분석 시작하기"
+                    t.start
                   )}
                 </Button>
                 {!modelLoaded && (
-                  <p className="text-sm text-gray-500 mt-2">AI 모델을 로드하는 중입니다. 잠시만 기다려주세요.</p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    {language === 'ko' 
+                      ? 'AI 모델을 로드하는 중입니다. 잠시만 기다려주세요.'
+                      : 'Loading AI model. Please wait a moment.'}
+                  </p>
                 )}
               </div>
             )}
@@ -318,16 +353,22 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
               <canvas ref={canvasRef} className="camera-canvas"></canvas>
             </div>
             
-            <img ref={photoRef} className="camera-photo" alt="촬영된 사진" />
+            <img ref={photoRef} className="camera-photo" alt={language === 'ko' ? '촬영된 사진' : 'Captured photo'} />
             
             <select id="cameraSelect" className="camera-select mt-4"></select>
             
             <div className="camera-controls">
-              <button id="startCameraButton" className="camera-button">카메라 시작</button>
-              <button id="captureCameraButton" className="camera-button capture">사진 촬영</button>
-              <button id="switchCameraButton" className="camera-button switch">카메라 전환</button>
+              <button id="startCameraButton" className="camera-button">
+                {language === 'ko' ? '카메라 시작' : 'Start Camera'}
+              </button>
+              <button id="captureCameraButton" className="camera-button capture">
+                {language === 'ko' ? '사진 촬영' : 'Take Photo'}
+              </button>
+              <button id="switchCameraButton" className="camera-button switch">
+                {language === 'ko' ? '카메라 전환' : 'Switch Camera'}
+              </button>
               <Button onClick={() => setCurrentStep('upload')} variant="outline">
-                뒤로 가기
+                {t.previous}
               </Button>
             </div>
           </div>
@@ -337,10 +378,12 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
           <div className="text-center py-12">
             <LoadingSpinner className="mx-auto mb-4 w-16 h-16" />
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              AI가 당신의 손금을 분석하고 있습니다
+              {language === 'ko' 
+                ? 'AI가 당신의 손금을 분석하고 있습니다'
+                : 'AI is analyzing your palm lines'}
             </h3>
             <p className="text-gray-600">
-              잠시만 기다려주세요...
+              {t.loading}
             </p>
           </div>
         )}
@@ -349,7 +392,7 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
           <div className="space-y-8">
             <div className="text-center">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                손금 분석 결과
+                {t.palmAnalysis}
               </h3>
               <p className="text-gray-600">
                 {result.overall}
@@ -360,7 +403,7 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
               <div>
                 <Card>
                   <CardHeader>
-                    <CardTitle>손금 이미지</CardTitle>
+                    <CardTitle>{language === 'ko' ? '손금 이미지' : 'Palm Image'}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <img
@@ -375,28 +418,28 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
               <div>
                 <Card>
                   <CardHeader>
-                    <CardTitle>손금 분석</CardTitle>
+                    <CardTitle>{t.palmAnalysis}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <h4 className="font-bold text-gray-900">생명선</h4>
+                        <h4 className="font-bold text-gray-900">{t.lifeLine}</h4>
                         <p className="text-gray-600">{result.lifeLine}</p>
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-900">감정선</h4>
+                        <h4 className="font-bold text-gray-900">{t.heartLine}</h4>
                         <p className="text-gray-600">{result.heartLine}</p>
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-900">지능선</h4>
+                        <h4 className="font-bold text-gray-900">{t.headLine}</h4>
                         <p className="text-gray-600">{result.headLine}</p>
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-900">운명선</h4>
+                        <h4 className="font-bold text-gray-900">{t.fateLine}</h4>
                         <p className="text-gray-600">{result.fateLine}</p>
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-900">능력선</h4>
+                        <h4 className="font-bold text-gray-900">{t.abilityLine}</h4>
                         <p className="text-gray-600">{result.abilityLine}</p>
                       </div>
                     </div>
@@ -411,14 +454,14 @@ export function PalmReadingTest({ open, onOpenChange }: PalmReadingTestProps) {
                 variant="outline"
               >
                 <Share2 className="w-4 h-4 mr-2" />
-                결과 공유하기
+                {t.share}
               </Button>
               <Button
                 onClick={handleReset}
                 variant="outline"
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
-                다시 시도하기
+                {t.restart}
               </Button>
             </div>
           </div>

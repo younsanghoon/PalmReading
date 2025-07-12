@@ -14,7 +14,7 @@ interface ResultChartProps {
 export function ResultChart({ data, type = 'bar', title, className }: ResultChartProps) {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   useEffect(() => {
     if (!chartRef.current || !data) return;
@@ -70,11 +70,11 @@ export function ResultChart({ data, type = 'bar', title, className }: ResultChar
     };
   }, [data, type, title]);
 
-  // 데이터가 없는 경우 빈 div 반환
+  // 데이터가 없는 경우 현재 언어에 맞는 로딩 메시지 반환
   if (!data) {
     return (
       <div className={className}>
-        {language === 'ko' ? '데이터를 불러오는 중...' : 'Loading data...'}
+        {t.loading || 'Loading data...'}
       </div>
     );
   }

@@ -425,7 +425,9 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                   ) : !modelLoaded ? (
                     <>
                       <LoadingSpinner className="mr-2" />
-                      {t.loading}
+                      {t.loadingAIModel || (language === 'ko' 
+                      ? 'AI 모델을 로드하는 중입니다. 잠시만 기다려주세요.'
+                      : 'Loading AI model. Please wait a moment.')}
                     </>
                   ) : (
                     t.start
@@ -433,9 +435,9 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                 </Button>
                 {!modelLoaded && (
                   <p className="text-sm text-gray-500 mt-2">
-                    {language === 'ko' 
+                    {t.loadingAIModel || (language === 'ko' 
                       ? 'AI 모델을 로드하는 중입니다. 잠시만 기다려주세요.'
-                      : 'Loading AI model. Please wait a moment.'}
+                      : 'Loading AI model. Please wait a moment.')}
                   </p>
                 )}
               </div>
@@ -456,19 +458,19 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
               <canvas ref={canvasRef} className="camera-canvas"></canvas>
             </div>
             
-            <img ref={photoRef} className="camera-photo" alt={language === 'ko' ? '촬영된 사진' : 'Captured photo'} />
+            <img ref={photoRef} className="camera-photo" alt={t.capturedPhoto} />
             
             <select id="cameraSelect" className="camera-select mt-4"></select>
             
             <div className="camera-controls">
               <button id="startCameraButton" className="camera-button">
-                {language === 'ko' ? '카메라 시작' : 'Start Camera'}
+                {t.startCamera}
               </button>
               <button id="captureCameraButton" className="camera-button capture">
-                {language === 'ko' ? '사진 촬영' : 'Take Photo'}
+                {t.takePhoto}
               </button>
               <button id="switchCameraButton" className="camera-button switch">
-                {language === 'ko' ? '카메라 전환' : 'Switch Camera'}
+                {t.switchCamera}
               </button>
               <Button onClick={() => setCurrentStep('upload')} variant="outline">
                 {t.previous}
@@ -529,25 +531,25 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                       <div>
                         <h4 className="font-bold text-gray-900">{t.personalityAnalysis}</h4>
                         <p className="text-gray-600">
-                          {language === 'ko' 
-                            ? result.personality 
-                            : ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES]?.en?.personality || result.personality}
+                          {language === 'en' && ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES]?.en?.personality
+                            ? ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES].en.personality
+                            : result.personality}
                         </p>
                       </div>
                       <div>
                         <h4 className="font-bold text-gray-900">{t.traits}</h4>
                         <p className="text-gray-600">
-                          {language === 'ko'
-                            ? result.charm
-                            : ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES]?.en?.charm || result.charm}
+                          {language === 'en' && ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES]?.en?.charm
+                            ? ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES].en.charm
+                            : result.charm}
                         </p>
                       </div>
                       <div>
                         <h4 className="font-bold text-gray-900">{t.description}</h4>
                         <p className="text-gray-600">
-                          {language === 'ko'
-                            ? result.dating
-                            : ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES]?.en?.dating || result.dating}
+                          {language === 'en' && ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES]?.en?.dating
+                            ? ANIMAL_PERSONALITIES[result.animalType as keyof typeof ANIMAL_PERSONALITIES].en.dating
+                            : result.dating}
                         </p>
                       </div>
                       <div>

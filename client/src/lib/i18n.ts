@@ -47,9 +47,23 @@ export interface Translations {
   analyzing: string;
   animalResult: string;
   
+  // Camera related
+  capturedPhoto: string;
+  startCamera: string;
+  switchCamera: string;
+  loadingAIModel: string;
+  
   // Palm test specific
   palmTestTitle: string;
   palmAnalysis: string;
+  uploadPalmImage: string;
+  palmImageInstructions: string;
+  lifeLine: string;
+  heartLine: string;
+  headLine: string;
+  fateLine: string;
+  abilityLine: string;
+  overallAnalysis: string;
   
   // Results
   compatibility: string;
@@ -63,6 +77,20 @@ export interface Translations {
   errorOccurred: string;
   imageRequired: string;
   analysisError: string;
+  
+  // Home page
+  homeDescription: string;
+  footerTitle: string;
+  footerDescription: string;
+  copyright: string;
+  safeTestEnvironment: string;
+  noDataCollection: string;
+  browserAnalysis: string;
+  allDevices: string;
+  instantResults: string;
+  privacyPolicy: string;
+  termsOfService: string;
+  contact: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -111,9 +139,23 @@ export const translations: Record<Language, Translations> = {
     analyzing: '분석 중...',
     animalResult: '동물상 결과',
     
+    // Camera related
+    capturedPhoto: '사진 촬영 완료',
+    startCamera: '카메라 시작',
+    switchCamera: '카메라 전환',
+    loadingAIModel: 'AI 모델 로딩 중...',
+    
     // Palm test specific
     palmTestTitle: '손금 분석',
     palmAnalysis: '손금 분석 결과',
+    uploadPalmImage: '손바닥 사진을 업로드하세요',
+    palmImageInstructions: '손바닥을 편 상태로 선명하게 촬영해 주세요. 손금이 잘 보이도록 조명을 밝게 해주세요.',
+    lifeLine: '생명선',
+    heartLine: '감정선',
+    headLine: '지능선',
+    fateLine: '운명선',
+    abilityLine: '능력선',
+    overallAnalysis: '전체 분석',
     
     // Results
     compatibility: '궁합',
@@ -126,7 +168,21 @@ export const translations: Record<Language, Translations> = {
     // Error messages
     errorOccurred: '오류가 발생했습니다',
     imageRequired: '이미지가 필요합니다',
-    analysisError: '분석 중 오류가 발생했습니다'
+    analysisError: '분석 중 오류가 발생했습니다',
+    
+    // Home page
+    homeDescription: 'AI 기술로 알아보는 여러가지 나의 모습\n성격, 운세, 외모까지 다양한 테스트를 경험해보세요',
+    footerTitle: 'AI 성격 테스트',
+    footerDescription: '인공지능 기반 다양한 성격 및 운세 분석 서비스',
+    copyright: '© 2024 AI 테스트. 모든 권리 보유.',
+    safeTestEnvironment: '안전한 테스트 환경',
+    noDataCollection: '개인정보 수집 및 저장 안 함',
+    browserAnalysis: '모든 분석은 브라우저에서 실행',
+    allDevices: '모든 기기에서 이용 가능',
+    instantResults: '즉시 결과 확인',
+    privacyPolicy: '개인정보 보호정책',
+    termsOfService: '이용약관',
+    contact: '문의하기'
   },
   
   en: {
@@ -174,9 +230,23 @@ export const translations: Record<Language, Translations> = {
     analyzing: 'Analyzing...',
     animalResult: 'Animal Face Result',
     
+    // Camera related
+    capturedPhoto: 'Photo captured',
+    startCamera: 'Start Camera',
+    switchCamera: 'Switch Camera',
+    loadingAIModel: 'Loading AI model...',
+    
     // Palm test specific
     palmTestTitle: 'Palm Reading',
     palmAnalysis: 'Palm Reading Results',
+    uploadPalmImage: 'Upload your palm image',
+    palmImageInstructions: 'Take a clear photo with your palm open. Make sure the lighting is good so your palm lines are visible.',
+    lifeLine: 'Life Line',
+    heartLine: 'Heart Line',
+    headLine: 'Head Line',
+    fateLine: 'Fate Line',
+    abilityLine: 'Ability Line',
+    overallAnalysis: 'Overall Analysis',
     
     // Results
     compatibility: 'Compatibility',
@@ -189,7 +259,21 @@ export const translations: Record<Language, Translations> = {
     // Error messages
     errorOccurred: 'An error occurred',
     imageRequired: 'Image is required',
-    analysisError: 'Error occurred during analysis'
+    analysisError: 'Error during analysis',
+    
+    // Home page
+    homeDescription: 'Discover different aspects of yourself with AI technology\nExperience various tests for personality, fortune, and appearance',
+    footerTitle: 'AI Personality Tests',
+    footerDescription: 'AI-based personality and fortune analysis services',
+    copyright: '© 2024 AI Tests. All rights reserved.',
+    safeTestEnvironment: 'Safe Testing Environment',
+    noDataCollection: 'No personal data collection or storage',
+    browserAnalysis: 'All analysis runs in your browser',
+    allDevices: 'Available on all devices',
+    instantResults: 'Instant results',
+    privacyPolicy: 'Privacy Policy',
+    termsOfService: 'Terms of Service',
+    contact: 'Contact Us'
   },
   
   ja: {
@@ -237,9 +321,23 @@ export const translations: Record<Language, Translations> = {
     analyzing: '分析中...',
     animalResult: '動物顔結果',
     
+    // Camera related
+    capturedPhoto: '写真撮影完了',
+    startCamera: 'カメラ開始',
+    switchCamera: 'カメラ切り替え',
+    loadingAIModel: 'AIモデル読み込み中...',
+    
     // Palm test specific
     palmTestTitle: '手相分析',
     palmAnalysis: '手相分析結果',
+    uploadPalmImage: '手のひらの写真をアップロードしてください',
+    palmImageInstructions: '手のひらを開いた状態で鮮明な写真を撮ってください。照明を明るくして手相がよく見えるようにしてください。',
+    lifeLine: '生命線',
+    heartLine: '感情線',
+    headLine: '知能線',
+    fateLine: '運命線',
+    abilityLine: '才能線',
+    overallAnalysis: '総合分析',
     
     // Results
     compatibility: '相性',
@@ -252,7 +350,21 @@ export const translations: Record<Language, Translations> = {
     // Error messages
     errorOccurred: 'エラーが発生しました',
     imageRequired: '画像が必要です',
-    analysisError: '分析中にエラーが発生しました'
+    analysisError: '分析中にエラーが発生しました',
+    
+    // Home page
+    homeDescription: 'AIテクノロジーで自分の様々な側面を発見\n性格、運勢、外見まで多様なテストを体験しよう',
+    footerTitle: 'AI性格テスト',
+    footerDescription: 'AI技術を活用した性格・運勢分析サービス',
+    copyright: '© 2024 AIテスト. 全ての権利を保有。',
+    safeTestEnvironment: '安全なテスト環境',
+    noDataCollection: '個人情報の収集・保存なし',
+    browserAnalysis: '全ての分析はブラウザ内で実行',
+    allDevices: 'あらゆるデバイスで利用可能',
+    instantResults: '即時結果確認',
+    privacyPolicy: 'プライバシーポリシー',
+    termsOfService: '利用規約',
+    contact: 'お問い合わせ'
   },
   
   zh: {
@@ -300,9 +412,23 @@ export const translations: Record<Language, Translations> = {
     analyzing: '分析中...',
     animalResult: '动物脸结果',
     
+    // Camera related
+    capturedPhoto: '照片拍摄完成',
+    startCamera: '开始相机',
+    switchCamera: '切换相机',
+    loadingAIModel: '加载AI模型中...',
+    
     // Palm test specific
     palmTestTitle: '手相分析',
     palmAnalysis: '手相分析结果',
+    uploadPalmImage: '上传您的手掌图片',
+    palmImageInstructions: '请拍摄清晰的手掌照片，确保光线充足，使手相线条清晰可见。',
+    lifeLine: '生命线',
+    heartLine: '感情线',
+    headLine: '智慧线',
+    fateLine: '命运线',
+    abilityLine: '能力线',
+    overallAnalysis: '整体分析',
     
     // Results
     compatibility: '配对',
@@ -315,7 +441,21 @@ export const translations: Record<Language, Translations> = {
     // Error messages
     errorOccurred: '发生错误',
     imageRequired: '需要图片',
-    analysisError: '分析时发生错误'
+    analysisError: '分析时发生错误',
+    
+    // Home page
+    homeDescription: '通过AI技术探索自我的多个方面\n体验各种性格、命运和外表测试',
+    footerTitle: 'AI性格测试',
+    footerDescription: '基于人工智能的性格和命运分析服务',
+    copyright: '© 2024 AI测试. 保留所有权利。',
+    safeTestEnvironment: '安全的测试环境',
+    noDataCollection: '不收集和存储个人信息',
+    browserAnalysis: '所有分析在浏览器中进行',
+    allDevices: '适用于所有设备',
+    instantResults: '即时查看结果',
+    privacyPolicy: '隐私政策',
+    termsOfService: '服务条款',
+    contact: '联系我们'
   },
   
   id: {
@@ -363,9 +503,23 @@ export const translations: Record<Language, Translations> = {
     analyzing: 'Menganalisis...',
     animalResult: 'Hasil Wajah Hewan',
     
+    // Camera related
+    capturedPhoto: 'Foto diambil',
+    startCamera: 'Mulai Kamera',
+    switchCamera: 'Tukar Kamera',
+    loadingAIModel: 'Memuat Model AI...',
+    
     // Palm test specific
     palmTestTitle: 'Analisis Telapak Tangan',
     palmAnalysis: 'Hasil Analisis Telapak Tangan',
+    uploadPalmImage: 'Unggah gambar telapak tangan Anda',
+    palmImageInstructions: 'Ambil foto yang jelas dengan telapak tangan terbuka. Pastikan pencahayaan baik agar garis telapak tangan Anda terlihat.',
+    lifeLine: 'Garis Kehidupan',
+    heartLine: 'Garis Hati',
+    headLine: 'Garis Kepala',
+    fateLine: 'Garis Takdir',
+    abilityLine: 'Garis Kemampuan',
+    overallAnalysis: 'Analisis Keseluruhan',
     
     // Results
     compatibility: 'Kompatibilitas',
@@ -378,7 +532,21 @@ export const translations: Record<Language, Translations> = {
     // Error messages
     errorOccurred: 'Terjadi kesalahan',
     imageRequired: 'Gambar diperlukan',
-    analysisError: 'Terjadi kesalahan saat analisis'
+    analysisError: 'Terjadi kesalahan saat analisis',
+    
+    // Home page
+    homeDescription: 'Temukan berbagai aspek diri Anda dengan teknologi AI\nAlami berbagai tes untuk kepribadian, nasib, dan penampilan',
+    footerTitle: 'Tes Kepribadian AI',
+    footerDescription: 'Layanan analisis kepribadian dan nasib berbasis kecerdasan buatan',
+    copyright: '© 2024 Tes AI. Semua hak dilindungi.',
+    safeTestEnvironment: 'Lingkungan Pengujian yang Aman',
+    noDataCollection: 'Tidak ada pengumpulan atau penyimpanan data pribadi',
+    browserAnalysis: 'Semua analisis berjalan di browser Anda',
+    allDevices: 'Tersedia di semua perangkat',
+    instantResults: 'Hasil instan',
+    privacyPolicy: 'Kebijakan Privasi',
+    termsOfService: 'Ketentuan Layanan',
+    contact: 'Hubungi Kami'
   },
   
   th: {
@@ -426,9 +594,23 @@ export const translations: Record<Language, Translations> = {
     analyzing: 'กำลังวิเคราะห์...',
     animalResult: 'ผลลัพธ์หน้าสัตว์',
     
+    // Camera related
+    capturedPhoto: 'ภาพถ่ายเสร็จสมบูรณ์',
+    startCamera: 'เริ่มคลิปคาเมร์',
+    switchCamera: 'สลับคลิปคาเมร์',
+    loadingAIModel: 'กำลังโหลดโมเดล AI...',
+    
     // Palm test specific
     palmTestTitle: 'การวิเคราะห์ลายมือ',
     palmAnalysis: 'ผลการวิเคราะห์ลายมือ',
+    uploadPalmImage: 'อัปโหลดภาพฝ่ามือของคุณ',
+    palmImageInstructions: 'ถ่ายภาพที่ชัดเจนโดยเปิดฝ่ามือ ตรวจสอบให้แน่ใจว่าแสงสว่างเพียงพอเพื่อให้เห็นเส้นลายมือชัดเจน',
+    lifeLine: 'เส้นชีวิต',
+    heartLine: 'เส้นความรัก',
+    headLine: 'เส้นสติปัญญา',
+    fateLine: 'เส้นโชคชะตา',
+    abilityLine: 'เส้นความสามารถ',
+    overallAnalysis: 'การวิเคราะห์โดยรวม',
     
     // Results
     compatibility: 'ความเข้ากัน',
@@ -441,7 +623,21 @@ export const translations: Record<Language, Translations> = {
     // Error messages
     errorOccurred: 'เกิดข้อผิดพลาด',
     imageRequired: 'จำเป็นต้องมีรูปภาพ',
-    analysisError: 'เกิดข้อผิดพลาดขณะวิเคราะห์'
+    analysisError: 'เกิดข้อผิดพลาดขณะวิเคราะห์',
+    
+    // Home page
+    homeDescription: 'ค้นพบด้านต่างๆ ของตัวคุณด้วยเทคโนโลยี AI\nสัมผัสการทดสอบหลากหลายสำหรับบุคลิกภาพ โชคชะตา และรูปลักษณ์',
+    footerTitle: 'การทดสอบบุคลิกภาพด้วย AI',
+    footerDescription: 'บริการวิเคราะห์บุคลิกภาพและโชคชะตาด้วยปัญญาประดิษฐ์',
+    copyright: '© 2024 การทดสอบ AI สงวนลิขสิทธิ์ทั้งหมด',
+    safeTestEnvironment: 'สภาพแวดล้อมการทดสอบที่ปลอดภัย',
+    noDataCollection: 'ไม่มีการเก็บหรือจัดเก็บข้อมูลส่วนบุคคล',
+    browserAnalysis: 'การวิเคราะห์ทั้งหมดทำงานในเบราว์เซอร์ของคุณ',
+    allDevices: 'ใช้งานได้บนทุกอุปกรณ์',
+    instantResults: 'ผลลัพธ์ทันที',
+    privacyPolicy: 'นโยบายความเป็นส่วนตัว',
+    termsOfService: 'เงื่อนไขการให้บริการ',
+    contact: 'ติดต่อเรา'
   },
   
   vi: {
@@ -489,9 +685,23 @@ export const translations: Record<Language, Translations> = {
     analyzing: 'Đang phân tích...',
     animalResult: 'Kết Quả Mặt Động Vật',
     
+    // Camera related
+    capturedPhoto: 'Ảnh được chụp',
+    startCamera: 'Bắt đầu Camera',
+    switchCamera: 'Chuyển đổi Camera',
+    loadingAIModel: 'Đang tải mô hình AI...',
+    
     // Palm test specific
     palmTestTitle: 'Phân Tích Tướng Tay',
     palmAnalysis: 'Kết Quả Phân Tích Tướng Tay',
+    uploadPalmImage: 'Tải lên hình ảnh lòng bàn tay của bạn',
+    palmImageInstructions: 'Chụp ảnh rõ ràng với lòng bàn tay mở. Đảm bảo ánh sáng tốt để các đường chỉ tay của bạn hiện rõ.',
+    lifeLine: 'Đường Sinh Mệnh',
+    heartLine: 'Đường Tình Cảm',
+    headLine: 'Đường Trí Tuệ',
+    fateLine: 'Đường Số Phận',
+    abilityLine: 'Đường Năng Lực',
+    overallAnalysis: 'Phân Tích Tổng Thể',
     
     // Results
     compatibility: 'Tương thích',
@@ -504,7 +714,21 @@ export const translations: Record<Language, Translations> = {
     // Error messages
     errorOccurred: 'Đã xảy ra lỗi',
     imageRequired: 'Cần có hình ảnh',
-    analysisError: 'Lỗi xảy ra trong quá trình phân tích'
+    analysisError: 'Lỗi xảy ra trong quá trình phân tích',
+    
+    // Home page
+    homeDescription: 'Khám phá nhiều khía cạnh của bản thân với công nghệ AI\nTrải nghiệm các bài kiểm tra đa dạng về tính cách, vận mệnh và ngoại hình',
+    footerTitle: 'Kiểm Tra Tính Cách AI',
+    footerDescription: 'Dịch vụ phân tích tính cách và vận mệnh dựa trên trí tuệ nhân tạo',
+    copyright: '© 2024 Kiểm Tra AI. Đã đăng ký bản quyền.',
+    safeTestEnvironment: 'Môi Trường Kiểm Tra An Toàn',
+    noDataCollection: 'Không thu thập hoặc lưu trữ dữ liệu cá nhân',
+    browserAnalysis: 'Tất cả phân tích được thực hiện trong trình duyệt của bạn',
+    allDevices: 'Khả dụng trên mọi thiết bị',
+    instantResults: 'Kết quả tức thì',
+    privacyPolicy: 'Chính Sách Bảo Mật',
+    termsOfService: 'Điều Khoản Dịch Vụ',
+    contact: 'Liên Hệ'
   }
 };
 

@@ -19,10 +19,7 @@ export function LanguageSelector() {
     changeLanguage(langCode);
     setIsOpen(false);
     
-    // 언어 변경 후 페이지 새로고침
-    setTimeout(() => {
-      window.location.reload();
-    }, 100);
+    // i18n.ts에서 페이지 새로고침을 처리하므로 여기서는 제거
   };
 
   return (

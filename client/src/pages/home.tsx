@@ -49,12 +49,11 @@ export default function Home() {
     },
   ];
 
-  // 손금 테스트 관련 텍스트
-  const pageTitle = "";
-  const pageDescription = "AI 기술로 알아보는 여러가지 나의 모습\n성격, 운세, 외모까지 다양한 테스트를 경험해보세요";
-  const footerTitle = "AI 성격 테스트";
-  const footerDescription = "인공지능 기반 다양한 성격 및 운세 분석 서비스";
-  const copyright = "© 2024 AI 테스트. 모든 권리 보유.";
+  // 홈페이지 텍스트 - 번역 시스템 사용
+  const pageDescription = t.homeDescription || "AI 기술로 알아보는 여러가지 나의 모습\n성격, 운세, 외모까지 다양한 테스트를 경험해보세요";
+  const footerTitle = t.footerTitle || "AI 성격 테스트";
+  const footerDescription = t.footerDescription || "인공지능 기반 다양한 성격 및 운세 분석 서비스";
+  const copyright = t.copyright || "© 2024 AI 테스트. 모든 권리 보유.";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
@@ -80,11 +79,6 @@ export default function Home() {
             {/* Content Area */}
             <div className="flex-1">
               <div className="text-center mb-12 animate-fade-in">
-                {pageTitle && (
-                  <h1 className="text-5xl font-bold gradient-text mb-6">
-                    {pageTitle}
-                  </h1>
-                )}
                 <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed whitespace-pre-line">
                   {pageDescription}
                 </p>
@@ -119,12 +113,12 @@ export default function Home() {
 
               <div className="text-center">
                 <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg max-w-2xl mx-auto">
-                  <h2 className="text-2xl font-semibold mb-4">안전한 테스트 환경</h2>
+                  <h2 className="text-2xl font-semibold mb-4">{t.safeTestEnvironment || "안전한 테스트 환경"}</h2>
                   <div className="text-gray-600 dark:text-gray-300 space-y-2">
-                    <p>🔒 개인정보 수집 및 저장 안 함</p>
-                    <p>🧠 모든 분석은 브라우저에서 실행</p>
-                    <p>📱 모든 기기에서 이용 가능</p>
-                    <p>⚡ 즉시 결과 확인</p>
+                    <p>🔒 {t.noDataCollection || "개인정보 수집 및 저장 안 함"}</p>
+                    <p>🧠 {t.browserAnalysis || "모든 분석은 브라우저에서 실행"}</p>
+                    <p>📱 {t.allDevices || "모든 기기에서 이용 가능"}</p>
+                    <p>⚡ {t.instantResults || "즉시 결과 확인"}</p>
                   </div>
                 </div>
               </div>
@@ -159,17 +153,17 @@ export default function Home() {
               <div className="flex gap-4">
                 <Link href="/PalmReading/privacy-policy">
                   <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                    개인정보 보호정책
+                    {t.privacyPolicy || "개인정보 보호정책"}
                   </Button>
                 </Link>
                 <Link href="/PalmReading/terms-of-service">
                   <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                    이용약관
+                    {t.termsOfService || "이용약관"}
                   </Button>
                 </Link>
                 <Link href="/PalmReading/contact">
                   <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
-                    문의하기
+                    {t.contact || "문의하기"}
                   </Button>
                 </Link>
               </div>
