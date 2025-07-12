@@ -58,13 +58,13 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
 
   // 언어 변경 이벤트 리스너
   useEffect(() => {
-    const handleLanguageChange = () => {
+    const handleLanguageChange = (event: Event) => {
+      console.log('[AnimalFaceTest] Language change detected', (event as CustomEvent).detail);
       // 언어 변경 시 필요한 상태 업데이트
       if (result) {
         // 결과가 있는 경우 결과 텍스트 업데이트
         const updatedResult = {
-          ...result,
-          // 필요한 번역된 텍스트 업데이트
+          ...result
         };
         setResult(updatedResult);
       }
@@ -123,10 +123,10 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
         videoElement: videoRef.current,
         canvasElement: canvasRef.current,
         photoElement: photoRef.current,
-        startButton: document.getElementById('startCameraButton'),
-        captureButton: document.getElementById('captureCameraButton'),
-        switchButton: document.getElementById('switchCameraButton'),
-        cameraSelect: document.getElementById('cameraSelect'),
+        startButton: document.getElementById('startCameraButton') as HTMLButtonElement,
+        captureButton: document.getElementById('captureCameraButton') as HTMLButtonElement,
+        switchButton: document.getElementById('switchCameraButton') as HTMLButtonElement,
+        cameraSelect: document.getElementById('cameraSelect') as HTMLSelectElement,
         onPhotoCapture: (dataUrl: string) => {
           setImageUrl(dataUrl);
           // 카메라 모드 종료 후 분석 단계로 이동
@@ -232,7 +232,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
       // Fallback: copy to clipboard
       try {
         await navigator.clipboard.writeText(window.location.href);
-        alert('링크가 클립보드에 복사되었습니다!');
+        alert(language === 'ko' ? '링크가 클립보드에 복사되었습니다!' : 'Link copied to clipboard!');
       } catch (err) {
         console.log('Copy failed:', err);
       }
@@ -245,7 +245,7 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
     return {
       labels: result.predictions.map((p: any) => p.className),
       datasets: [{
-        label: '확률 (%)',
+        label: language === 'ko' ? '확률 (%)' : 'Probability (%)',
         data: result.predictions.map((p: any) => (p.probability * 100).toFixed(1)),
         backgroundColor: [
           '#6366f1', '#ec4899', '#f59e0b', '#10b981', '#8b5cf6', '#f97316'
@@ -315,7 +315,9 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                 {t.uploadImage}
               </h3>
               <p className="text-gray-600">
-                정면을 바라보는 깔끔한 사진을 업로드하면 더 정확한 분석이 가능합니다.
+                {language === 'ko' 
+                  ? '정면을 바라보는 깔끔한 사진을 업로드하면 더 정확한 분석이 가능합니다.'
+                  : 'Upload a clear photo facing forward for more accurate analysis.'}
               </p>
             </div>
 
@@ -372,7 +374,11 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
                   )}
                 </Button>
                 {!modelLoaded && (
-                  <p className="text-sm text-gray-500 mt-2">AI 모델을 로드하는 중입니다. 잠시만 기다려주세요.</p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    {language === 'ko' 
+                      ? 'AI 모델을 로드하는 중입니다. 잠시만 기다려주세요.'
+                      : 'Loading AI model. Please wait a moment.'}
+                  </p>
                 )}
               </div>
             )}
@@ -392,14 +398,20 @@ export function AnimalFaceTest({ open, onOpenChange }: AnimalFaceTestProps) {
               <canvas ref={canvasRef} className="camera-canvas"></canvas>
             </div>
             
-            <img ref={photoRef} className="camera-photo" alt="촬영된 사진" />
+            <img ref={photoRef} className="camera-photo" alt={language === 'ko' ? '촬영된 사진' : 'Captured photo'} />
             
             <select id="cameraSelect" className="camera-select mt-4"></select>
             
             <div className="camera-controls">
-              <button id="startCameraButton" className="camera-button">카메라 시작</button>
-              <button id="captureCameraButton" className="camera-button capture">사진 촬영</button>
-              <button id="switchCameraButton" className="camera-button switch">카메라 전환</button>
+              <button id="startCameraButton" className="camera-button">
+                {language === 'ko' ? '카메라 시작' : 'Start Camera'}
+              </button>
+              <button id="captureCameraButton" className="camera-button capture">
+                {language === 'ko' ? '사진 촬영' : 'Take Photo'}
+              </button>
+              <button id="switchCameraButton" className="camera-button switch">
+                {language === 'ko' ? '카메라 전환' : 'Switch Camera'}
+              </button>
               <Button onClick={() => setCurrentStep('upload')} variant="outline">
                 {t.previous}
               </Button>

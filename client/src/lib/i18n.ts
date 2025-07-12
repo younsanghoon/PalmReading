@@ -535,10 +535,16 @@ export function useLanguage() {
       localStorage.setItem('language', newLanguage);
       
       // 언어 변경 이벤트를 전파하여 모든 컴포넌트에 알림
-      const event = new CustomEvent('languageChanged', { detail: { language: newLanguage } });
+      console.log('[i18n] Dispatching language change event:', newLanguage);
+      const event = new CustomEvent('languageChanged', { 
+        detail: { language: newLanguage },
+        bubbles: true,
+        cancelable: true
+      });
       window.dispatchEvent(event);
       
       // 모달이나 팝업에도 변경 사항이 적용되도록 페이지 새로고침
+      console.log('[i18n] Reloading page to apply language change');
       window.location.reload();
     }
   };

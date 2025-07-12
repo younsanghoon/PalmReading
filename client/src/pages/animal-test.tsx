@@ -9,7 +9,7 @@ import { useLanguage } from "@/lib/i18n";
 
 export default function AnimalTestPage() {
   const [isTestOpen, setIsTestOpen] = useState(false);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
@@ -60,10 +60,21 @@ export default function AnimalTestPage() {
               <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
                 <h2 className="text-2xl font-semibold mb-4">{t.animalTestTitle}</h2>
                 <div className="space-y-4 text-gray-600 dark:text-gray-300">
-                  <p>• 얼굴 사진을 업로드하거나 카메라로 촬영하세요</p>
-                  <p>• AI가 얼굴 특징을 분석하여 동물상을 판단합니다</p>
-                  <p>• 강아지상, 고양이상, 곰상, 여우상, 원숭이상, 토끼상 중 분석</p>
-                  <p>• 개인정보는 저장되지 않으며, 분석 후 즉시 삭제됩니다</p>
+                  {language === 'ko' ? (
+                    <>
+                      <p>• 얼굴 사진을 업로드하거나 카메라로 촬영하세요</p>
+                      <p>• AI가 얼굴 특징을 분석하여 동물상을 판단합니다</p>
+                      <p>• 강아지상, 고양이상, 곰상, 여우상, 원숭이상, 토끼상 중 분석</p>
+                      <p>• 개인정보는 저장되지 않으며, 분석 후 즉시 삭제됩니다</p>
+                    </>
+                  ) : (
+                    <>
+                      <p>• Upload a face photo or take one with your camera</p>
+                      <p>• AI analyzes facial features to determine your animal type</p>
+                      <p>• Analysis includes dog, cat, bear, fox, monkey, and rabbit types</p>
+                      <p>• Your personal data is not stored and is deleted immediately after analysis</p>
+                    </>
+                  )}
                 </div>
               </div>
 
