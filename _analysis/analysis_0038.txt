@@ -1,93 +1,161 @@
-# GitHub Pages 배포 환경에서의 모델 경로 문제 분석
+# 분석: AI 모델 로딩 및 오류 처리 시스템 개선
 
-## 문제 상황
-GitHub Pages를 통해 `https://younsanghoon.github.io/PalmReading/` 주소로 웹사이트를 배포한 후, 동물상 테스트 페이지에서 AI 모델이 로드되지 않는 문제가 발생했습니다. 사용자가 동물상 테스트 페이지에 접속했을 때 빈 화면만 표시되는 현상이 관찰되었습니다.
+## AI 모델 시스템 구조
 
-## 원인 분석
+### 1. AI 모델 관리 시스템 (client/src/lib/ai-models.ts)
+- TensorFlow.js와 Teachable Machine을 활용한 AI 모델 로딩 및 예측 기능 제공
+- 모델 캐싱 시스템으로 중복 로딩 방지
+- 오류 발생 시 대체 예측 결과 생성 기능 (fallback mechanism)
+- 동물상 및 손금 분석을 위한 별도 예측 함수 구현
 
-### 1. 모델 파일 경로 불일치
-- **상대 경로 문제**: 모델 파일 경로가 `/attached_assets/model.json`으로 설정되어 있었으나, GitHub Pages에서는 기본 경로가 `/PalmReading/`이므로 실제 접근 경로는 `/PalmReading/attached_assets/model.json`이 되어야 합니다.
-
-- **파일명 불일치**: 코드에서는 `model.json`과 `metadata.json`으로 참조하고 있었지만, 실제 파일명은 `model_1752161703239.json`과 `metadata_1752161703239.json`이었습니다.
-
-### 2. 리소스 로드 경로 문제
-- **카메라 스크립트 경로**: 카메라 기능을 위한 CSS와 JS 파일 경로도 GitHub Pages 배포 환경에 맞게 수정이 필요했습니다.
-  - `/camera-capture.css` → `/PalmReading/camera-capture.css`
-  - `/camera-capture.js` → `/PalmReading/camera-capture.js`
-
-### 3. 관련 코드 분석
-- **animal-face-test.tsx**: 동물상 테스트 컴포넌트에서 모델 URL을 정의하는 부분
-  ```typescript
-  const modelURL = '/attached_assets/model.json';
-  const metadataURL = '/attached_assets/metadata.json';
-  ```
-
-- **ai-models.ts**: AI 모델 로드 및 예측 함수에서 모델 URL을 사용하는 부분
-  ```typescript
-  const modelUrl = window.location.origin + '/attached_assets/model.json';
-  ```
-
-## 해결 방법
-
-### 1. 모델 파일 경로 수정
-- **animal-face-test.tsx**에서 모델 URL 수정:
-  ```typescript
-  const modelURL = '/PalmReading/attached_assets/model_1752161703239.json';
-  const metadataURL = '/PalmReading/attached_assets/metadata_1752161703239.json';
-  ```
-
-- **ai-models.ts**에서 모델 URL 수정:
-  ```typescript
-  // 동물상 모델
-  const modelUrl = window.location.origin + '/PalmReading/attached_assets/model_1752161703239.json';
+```typescript
+// 모델 로드 함수
+async function loadModel(modelURL: string, metadataURL: string): Promise<tmImage.CustomMobileNet> {
+  // 캐시에 모델이 있으면 재사용
+  const cacheKey = `${modelURL}|${metadataURL}`;
+  if (modelCache[cacheKey]) {
+    console.log('[AI-Models] Using cached model:', cacheKey);
+    return modelCache[cacheKey];
+  }
   
-  // 손금 예측 함수
-  const modelURL = window.location.origin + '/PalmReading/attached_assets/model_1752161703239.json';
-  const metadataURL = window.location.origin + '/PalmReading/attached_assets/metadata_1752161703239.json';
-  ```
-
-### 2. 카메라 스크립트 경로 수정
-```typescript
-// CSS 로드
-const link = document.createElement('link');
-link.rel = 'stylesheet';
-link.href = '/PalmReading/camera-capture.css';
-document.head.appendChild(link);
-
-// JS 로드
-const script = document.createElement('script');
-script.id = 'camera-capture-script';
-script.src = '/PalmReading/camera-capture.js';
-script.async = true;
-document.body.appendChild(script);
+  // 모델 로드 시도
+  try {
+    // 모델 파일 존재 확인 후 로드
+    // ...
+    const model = await tmImage.load(modelURL, metadataURL);
+    modelCache[cacheKey] = model; // 캐싱
+    return model;
+  } catch (error) {
+    // 오류 발생 시 대체 모델 생성
+    // ...
+  }
+}
 ```
 
-## 배포 환경 관련 고려사항
-
-### 1. 기본 경로(Base Path) 설정
-- **vite.config.ts**에서 이미 `base: '/PalmReading/'`으로 설정되어 있어 빌드된 정적 파일의 경로는 올바르게 처리됨
-- 그러나 코드 내에서 직접 참조하는 경로는 수동으로 수정 필요
-
-### 2. 동적 경로 처리 방법
-향후 개선 방안으로 환경에 따라 자동으로 경로를 설정하는 방법을 고려할 수 있습니다:
+### 2. Teachable Machine 훅 (client/src/hooks/use-teachable-machine.ts)
+- React 컴포넌트에서 AI 모델을 쉽게 사용할 수 있는 인터페이스 제공
+- 로딩 상태, 오류 상태 관리
+- 예측 함수 제공 (일반, 동물상, 손금)
 
 ```typescript
-// 환경에 따른 기본 경로 설정
-const basePath = import.meta.env.MODE === 'production' ? '/PalmReading/' : '/';
+export function useTeachableMachine({ modelURL, metadataURL }: UseTeachableMachineProps = {}): UseTeachableMachineReturn {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [model, setModel] = useState(false);
 
-// 모델 URL 정의
-const modelURL = `${basePath}attached_assets/model_1752161703239.json`;
-const metadataURL = `${basePath}attached_assets/metadata_1752161703239.json`;
+  // 예측 함수들...
+  const predictAnimal = useCallback(async (imageElement: HTMLImageElement) => {
+    // ...
+  }, []);
+
+  return {
+    isLoading,
+    error,
+    model,
+    predict,
+    predictAnimal,
+    predictPalm
+  };
+}
 ```
 
-### 3. 모델 파일 관리 개선
-- 모델 파일명에 타임스탬프 대신 의미 있는 이름 사용 고려 (예: `animal_model.json`, `palm_model.json`)
-- 모델 파일 경로를 중앙에서 관리하는 설정 파일 도입 고려
+### 3. 테스트 컴포넌트 (client/src/components/personality-tests/animal-face-test.tsx)
+- 사용자 인터페이스 및 분석 로직 구현
+- 이미지 업로드/촬영 기능
+- 분석 결과 표시 및 공유 기능
 
-## 교훈 및 향후 개선점
+## 발견된 문제점
 
-1. **배포 환경 테스트**: 로컬 개발 환경뿐만 아니라 실제 배포 환경에서도 테스트 필요
-2. **경로 일관성**: 모든 리소스 경로를 일관되게 관리하는 방법 도입
-3. **환경 변수 활용**: 개발/프로덕션 환경에 따라 자동으로 경로 설정
-4. **오류 처리 강화**: 모델 로드 실패 시 사용자에게 명확한 피드백 제공
-5. **모델 로드 상태 모니터링**: 모델 로드 상태를 UI에 반영하여 사용자 경험 개선 
+### 1. 모델 파일 경로 문제
+- 상대 경로 사용으로 인한 모델 파일 접근 실패
+- GitHub Pages 배포 환경에서 경로 불일치
+
+### 2. 오류 처리 미흡
+- 모델 로딩 실패 시 적절한 대체 메커니즘 부재
+- 예측 실패 시 사용자에게 오류 메시지만 표시하고 대안 제시 없음
+
+### 3. 예외 케이스 처리 부재
+- 알 수 없는 동물 유형 반환 시 처리 로직 없음
+- 이미지 요소 생성 실패 시 명확한 피드백 부재
+
+## 개선 사항
+
+### 1. 모델 URL 경로 수정
+```typescript
+// 개선 전
+const modelURL = '/PalmReading/attached_assets/model_1752161703239.json';
+
+// 개선 후
+const modelURL = window.location.origin + '/PalmReading/attached_assets/model_1752161703239.json';
+```
+
+### 2. 함수 내보내기 추가
+```typescript
+// 개선 전
+async function generateSimpleHash(str: string): Promise<number> { /* ... */ }
+function generateFallbackPredictions(hash: number, modelURL: string): { /* ... */ } { /* ... */ }
+
+// 개선 후
+export async function generateSimpleHash(str: string): Promise<number> { /* ... */ }
+export function generateFallbackPredictions(hash: number, modelURL: string): { /* ... */ } { /* ... */ }
+```
+
+### 3. 오류 처리 강화
+```typescript
+// 개선 전
+catch (err) {
+  const errorMessage = err instanceof Error ? err.message : 'Failed to analyze animal face';
+  setError(errorMessage);
+  return null;
+}
+
+// 개선 후
+catch (err) {
+  const errorMessage = err instanceof Error ? err.message : 'Failed to analyze animal face';
+  console.error('[useTeachableMachine] Error in predictAnimal:', errorMessage);
+  setError(errorMessage);
+  
+  // 오류 발생 시에도 fallback 결과를 반환
+  try {
+    const imageHash = await generateSimpleHash(imageElement.src);
+    const fallbackResults = generateFallbackPredictions(imageHash, 'animal');
+    return fallbackResults;
+  } catch (fallbackErr) {
+    console.error('[useTeachableMachine] Failed to generate fallback results:', fallbackErr);
+    return null;
+  }
+}
+```
+
+### 4. 예외 케이스 처리 개선
+```typescript
+// 동물 유형이 ANIMAL_PERSONALITIES에 있는지 확인
+if (!Object.keys(ANIMAL_PERSONALITIES).includes(animalType)) {
+  console.error('[AnimalFaceTest] Unknown animal type:', animalType);
+  // 대체 동물 유형 사용
+  const fallbackAnimalType = Object.keys(ANIMAL_PERSONALITIES)[0];
+  console.warn(`[AnimalFaceTest] Using fallback animal type: ${fallbackAnimalType}`);
+  
+  // 대체 결과 생성 및 표시
+  // ...
+}
+```
+
+## 향후 개선 방향
+
+### 1. 모델 최적화
+- 모델 크기 축소 및 양자화 적용
+- 점진적 로딩 구현으로 초기 로딩 시간 단축
+
+### 2. 고급 캐싱 전략
+- IndexedDB를 활용한 모델 영구 캐싱
+- 서비스 워커를 통한 오프라인 모델 접근 지원
+
+### 3. 사용자 경험 개선
+- 모델 로딩 진행률 표시
+- 분석 정확도 개선을 위한 이미지 전처리 강화
+- 다양한 네트워크 환경에 대응하는 적응형 로딩 전략
+
+### 4. 모니터링 및 분석
+- 모델 로딩 및 예측 성능 원격 모니터링
+- 오류 발생 패턴 분석 및 자동 대응 시스템 구축 
