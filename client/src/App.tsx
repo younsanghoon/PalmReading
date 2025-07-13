@@ -21,22 +21,31 @@ function App() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      {/* PalmReading 경로도 유지하여 이전 링크 호환성 확보 */}
       <Route path="/PalmReading" component={Home} />
       <Route path="/PalmReading/" component={Home} />
+      
       <Route path="/animal-test" component={AnimalTest} />
       <Route path="/PalmReading/animal-test" component={AnimalTest} />
+      
       <Route path="/mbti-test" component={MbtiTest} />
       <Route path="/PalmReading/mbti-test" component={MbtiTest} />
+      
       <Route path="/enneagram-test" component={EnneagramTest} />
       <Route path="/PalmReading/enneagram-test" component={EnneagramTest} />
+      
       <Route path="/palm-test" component={PalmTest} />
       <Route path="/PalmReading/palm-test" component={PalmTest} />
+      
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/PalmReading/privacy-policy" component={PrivacyPolicy} />
+      
       <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/PalmReading/terms-of-service" component={TermsOfService} />
+      
       <Route path="/contact" component={Contact} />
       <Route path="/PalmReading/contact" component={Contact} />
+      
       <Route component={NotFound} />
     </Switch>
   );
