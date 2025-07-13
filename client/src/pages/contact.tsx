@@ -53,7 +53,7 @@ export default function ContactPage() {
                         이메일 주소:
                       </p>
                       <p className="font-mono text-blue-600 dark:text-blue-400">
-                        support@personality-test.com
+                        yjhyjh671@naver.com
                       </p>
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400">
