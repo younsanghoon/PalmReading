@@ -5,7 +5,7 @@ import "./index.css";
 // PWA 서비스 워커 등록
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/PalmReading/sw.js')
+    navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
         console.log('SW registered: ', registration);
       })
