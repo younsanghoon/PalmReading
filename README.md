@@ -15,11 +15,11 @@ AI를 활용한 손금 분석 및 다양한 성격 테스트 웹 애플리케이
 - AI 모델: TensorFlow.js, Teachable Machine
 - 배포: GitHub Pages
 
-## 웹사이트 /PalmReading/
+## 웹사이트 /younsanghoon.github.io/
 
 이 프로젝트는 GitHub Pages를 통해 배포되었습니다.
 
-👉 [얼굴/성격 유형 웹사이트](https://younsanghoon.github.io/PalmReading/)
+👉 [얼굴/성격 유형 웹사이트](https://younsanghoon.github.io/)
 
 ## 로컬 개발 환경 설정
 
