@@ -18,7 +18,7 @@ export default defineConfig({
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
   },
-  base: '/PalmReading/',
+  base: '/',  // '/PalmReading/'에서 '/'로 변경됨
   server: {
     host: true,
     fs: {
