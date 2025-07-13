@@ -2,20 +2,20 @@
   "name": "손금 테스트",
   "short_name": "손금테스트",
   "description": "AI로 알아보는 나의 운명 - 손금으로 보는 미래",
-  "start_url": "/",  // "/PalmReading/"에서 "/"로 변경
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#667eea",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/icon-192.png",  // "/PalmReading/icon-192.png"에서 변경
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/icon-512.png",  // "/PalmReading/icon-512.png"에서 변경
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
