@@ -1,0 +1,82 @@
+# GitHub Pages 배포 자동화 작업 기록
+
+## 날짜: 2023-07-12
+
+## 문제 상황
+- GitHub Pages 배포가 수동으로 이루어지고 있어 번거로움
+- 배포 과정에서 오류 발생 가능성이 높음
+- 홈 페이지를 메인으로 설정했지만 GitHub Pages에 반영되지 않음
+
+## 작업 타임라인
+
+### 1. GitHub Actions 워크플로우 조사 (12:00 - 12:15)
+- GitHub Pages 배포를 위한 다양한 GitHub Actions 워크플로우 조사
+- peaceiris/actions-gh-pages 액션이 가장 적합하다고 판단
+- 워크플로우 설정 방법 및 옵션 확인
+
+### 2. 워크플로우 파일 생성 (12:15 - 12:30)
+- `.github/workflows/gh-pages.yml` 파일 생성
+- 기본적인 배포 설정 구성
+  - Node.js 환경 설정
+  - 의존성 설치
+  - 빌드 및 배포 단계 설정
+- 권한 설정 (contents: write)
+- 배포 옵션 설정 (force_orphan: true)
+
+### 3. 워크플로우 커밋 및 푸시 (12:30 - 12:45)
+- 워크플로우 파일을 Git에 추가
+- "Add GitHub Pages workflow" 메시지로 커밋
+- main 브랜치에 푸시하여 워크플로우 트리거
+
+## 사용한 명령어
+```bash
+mkdir -p .github/workflows                            # 워크플로우 디렉토리 생성
+git add .github/workflows/gh-pages.yml                # 워크플로우 파일 스테이징
+git commit -m "Add GitHub Pages workflow"             # 커밋
+git push origin main                                  # 푸시
+```
+
+## 워크플로우 구성 내용
+```yaml
+name: GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist/public
+          force_orphan: true
+```
+
+## 다음 단계
+1. GitHub Actions 워크플로우 실행 결과 확인
+2. GitHub 저장소 설정에서 Pages 소스를 GitHub Actions로 변경
+3. 배포된 웹사이트 확인하여 홈 페이지가 올바르게 표시되는지 확인 

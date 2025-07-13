@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://younsanghoon.github.io/PalmReading/sitemap.xml

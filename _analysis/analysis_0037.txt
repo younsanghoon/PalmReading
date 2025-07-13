@@ -1,0 +1,108 @@
+# 분석: 다국어 지원 시스템 및 개선 사항
+
+## 다국어 지원 시스템 구조
+
+### 1. 언어 관리 시스템 (client/src/lib/i18n.ts)
+- `useLanguage` 훅을 통한 언어 상태 관리
+- 지원 언어: 한국어(ko), 영어(en), 일본어(ja), 중국어(zh), 인도네시아어(id), 태국어(th), 베트남어(vi)
+- 번역 텍스트는 `translations` 객체에 언어별로 정의
+- 브라우저 언어 자동 감지 및 localStorage를 통한 언어 설정 저장
+
+```typescript
+// 언어 변경 함수
+const changeLanguage = (newLanguage: Language) => {
+  setLanguage(newLanguage);
+  localStorage.setItem('language', newLanguage);
+  
+  // 언어 변경 이벤트 발생
+  const event = new CustomEvent('languageChanged', { 
+    detail: { language: newLanguage },
+    bubbles: true,
+    cancelable: true
+  });
+  window.dispatchEvent(event);
+  
+  // 페이지 새로고침
+  window.location.reload();
+};
+```
+
+### 2. 언어 선택기 컴포넌트 (client/src/components/ui/language-selector.tsx)
+- 드롭다운 메뉴를 통해 언어 선택 UI 제공
+- 각 언어별 국기 아이콘과 이름 표시
+- 현재 선택된 언어 하이라이트
+
+### 3. 번역 텍스트 사용 방식
+- 컴포넌트에서 `useLanguage` 훅을 통해 `t` 객체와 `language` 변수 접근
+- `t.key` 형태로 번역된 텍스트 사용 (예: `t.home`, `t.start`)
+- 정적 텍스트는 `language === 'ko' ? '한국어' : 'English'` 형태로 조건부 렌더링
+
+## 발견된 문제점
+
+### 1. 언어 변경 이벤트 전파 문제
+- 이벤트 객체에 `bubbles`, `cancelable` 속성이 없어 이벤트 전파가 제한적이었음
+- 이벤트 발생 후 로깅이 없어 디버깅이 어려웠음
+
+### 2. 정적 텍스트 번역 누락
+- 많은 컴포넌트에서 한국어 하드코딩된 텍스트가 있었음
+- 특히 동물상 테스트 컴포넌트에서 다수 발견
+
+### 3. 컴포넌트 언어 변경 이벤트 처리 미흡
+- 언어 변경 이벤트 핸들러에서 이벤트 객체 타입 정의 부재
+- 결과 데이터 업데이트 로직 미흡
+
+### 4. 차트 컴포넌트 번역 누락
+- 데이터 로딩 메시지, 차트 라벨 등이 한국어로만 표시됨
+
+## 개선 사항
+
+### 1. 언어 변경 이벤트 개선
+```typescript
+// 개선된 언어 변경 이벤트
+const event = new CustomEvent('languageChanged', { 
+  detail: { language: newLanguage },
+  bubbles: true,
+  cancelable: true
+});
+```
+
+### 2. 이벤트 핸들러 타입 및 로깅 개선
+```typescript
+// 개선된 이벤트 핸들러
+const handleLanguageChange = (event: Event) => {
+  console.log('[ComponentName] Language change detected', (event as CustomEvent).detail);
+  // 상태 업데이트 로직
+};
+```
+
+### 3. 정적 텍스트 조건부 렌더링
+```tsx
+// 조건부 텍스트 렌더링
+{language === 'ko' 
+  ? '한국어 텍스트'
+  : 'English text'
+}
+```
+
+### 4. DOM 요소 타입 캐스팅
+```typescript
+// 타입 캐스팅 개선
+startButton: document.getElementById('startButton') as HTMLButtonElement
+```
+
+## 향후 개선 방향
+
+### 1. 다른 테스트 페이지 언어 지원 확장
+- MBTI 테스트, 에니어그램 테스트, 손금 테스트에도 동일한 개선 적용 필요
+
+### 2. 페이지 새로고침 없는 언어 변경
+- React Context API를 활용한 전역 상태 관리 검토
+- 컴포넌트 마운트 시점이 아닌 언어 변경 시점에 번역 텍스트 업데이트
+
+### 3. 번역 시스템 모듈화
+- i18next 같은 전문 라이브러리 도입 검토
+- 번역 파일 분리 및 동적 로딩 구현
+
+### 4. 자동 번역 지원
+- 누락된 번역에 대한 자동 번역 API 연동 검토
+- 사용자 기여 번역 시스템 구축 가능성 검토 

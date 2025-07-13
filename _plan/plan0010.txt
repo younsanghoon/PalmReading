@@ -1,0 +1,103 @@
+# 다국어 지원 개선 계획 (추가 작업)
+
+## 현재까지 완료한 작업
+1. i18n.ts 파일에 손금 테스트 관련 번역 키 추가 및 7개 언어에 대한 번역 텍스트 추가
+2. palm-reading-test.tsx 파일에서 하드코딩된 텍스트를 번역 시스템(t 객체) 사용으로 대체
+3. 언어 변경 이벤트 리스너 추가하여 언어 변경 시 컴포넌트 업데이트 구현
+4. language-selector.tsx 파일에서 중복된 페이지 새로고침 코드 제거
+5. 다국어 조건부 렌더링 개선 (result-chart.tsx, animal-face-test.tsx)
+6. 다국어 데이터 구조 확장 (홈페이지, 카메라 관련 번역 키 추가)
+
+## 추가 작업 계획
+
+### 1. 타입 에러 해결 (우선순위: 높음)
+- animal-face-test.tsx 파일에서 발생하는 타입 에러 수정
+- ANIMAL_PERSONALITIES 타입 정의 개선
+- 동물 성격 데이터 구조를 모든 지원 언어에 대응할 수 있도록 수정
+
+### 2. MBTI 테스트 컴포넌트 다국어 지원 개선 (우선순위: 중간)
+- mbti-test.tsx 파일에서 조건부 렌더링 코드 개선
+- 하드코딩된 텍스트를 번역 시스템(t 객체) 사용으로 대체
+- 언어 변경 이벤트 리스너 추가 및 업데이트 로직 구현
+
+### 3. 에니어그램 테스트 컴포넌트 다국어 지원 개선 (우선순위: 중간)
+- enneagram-test.tsx 파일에서 조건부 렌더링 코드 개선
+- 하드코딩된 텍스트를 번역 시스템(t 객체) 사용으로 대체
+- 언어 변경 이벤트 리스너 추가 및 업데이트 로직 구현
+
+### 4. 동물 성격 데이터 다국어 확장 (우선순위: 낮음)
+- ANIMAL_PERSONALITIES 객체에 모든 지원 언어(ja, zh, id, th, vi)에 대한 번역 추가
+- 각 언어별로 동물 성격 데이터(personality, charm, dating, traits 등) 번역
+- 동물 성격 데이터 표시 로직 수정하여 모든 언어에 대응
+
+### 5. 다국어 지원 테스트 및 검증 (우선순위: 높음)
+- 모든 지원 언어에서 각 페이지와 컴포넌트가 올바르게 표시되는지 확인
+- 언어 변경 시 모든 텍스트가 선택한 언어로 업데이트되는지 확인
+- 특수 문자, 폰트 렌더링 등 언어별 특수 사항 확인
+
+### 6. 코드 최적화 및 리팩토링 (우선순위: 중간)
+- 중복된 언어 관련 코드 제거 및 공통 함수로 추출
+- 번역 키 네이밍 일관성 확보
+- 불필요한 조건부 렌더링 코드 간소화
+
+## 구현 방법 및 접근 방식
+
+### 타입 에러 해결
+```typescript
+// ANIMAL_PERSONALITIES 타입 정의 개선
+interface AnimalPersonality {
+  traits: string[];
+  description: string;
+  personality: string;
+  charm: string;
+  dating: string;
+  // 언어별 번역 추가
+  en?: {
+    traits: string[];
+    description: string;
+    personality: string;
+    charm: string;
+    dating: string;
+  };
+  ja?: {/* 일본어 번역 */};
+  zh?: {/* 중국어 번역 */};
+  id?: {/* 인도네시아어 번역 */};
+  th?: {/* 태국어 번역 */};
+  vi?: {/* 베트남어 번역 */};
+}
+
+const ANIMAL_PERSONALITIES: Record<string, AnimalPersonality> = {
+  // 기존 데이터
+};
+```
+
+### 동물 성격 데이터 표시 로직 수정
+```typescript
+// 개선된 동물 성격 데이터 표시 로직
+const getAnimalPersonalityText = (animalType: string, field: keyof AnimalPersonality, language: Language): string => {
+  const animalData = ANIMAL_PERSONALITIES[animalType];
+  if (!animalData) return '';
+  
+  // 현재 언어에 해당하는 번역이 있으면 사용
+  if (animalData[language]?.[field]) {
+    return animalData[language]![field];
+  }
+  
+  // 영어 번역이 있고 현재 언어가 영어가 아니면 영어 사용
+  if (language !== 'ko' && animalData.en?.[field]) {
+    return animalData.en[field];
+  }
+  
+  // 기본값(한국어) 사용
+  return animalData[field];
+};
+```
+
+## 일정 및 마일스톤
+1. **1일차**: 타입 에러 해결 및 animal-face-test.tsx 개선
+2. **2일차**: MBTI 테스트 및 에니어그램 테스트 컴포넌트 다국어 지원 개선
+3. **3일차**: 동물 성격 데이터 다국어 확장 및 코드 최적화
+4. **4일차**: 다국어 지원 테스트 및 검증, 버그 수정
+
+## 결론
+이 계획을 통해 PalmReading 프로젝트의 다국어 지원 기능을 완전히 개선하고, 모든 지원 언어에서 일관된 사용자 경험을 제공할 수 있을 것입니다. 특히 타입 에러 해결과 다른 테스트 컴포넌트의 다국어 지원 개선이 중요한 작업이 될 것입니다. 

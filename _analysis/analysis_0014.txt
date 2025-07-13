@@ -1,0 +1,252 @@
+# PalmReading 프로젝트 분석 - GitHub Pages 배포 상태 및 최적화
+
+## 1. GitHub Pages 배포 현황
+
+### 1.1 배포 설정 요약
+- **배포 URL**: https://younsanghoon.github.io/PalmReading/
+- **배포 방식**: GitHub Actions 워크플로우 자동화
+- **브랜치 전략**: 
+  - 소스 코드: `main` 브랜치
+  - 배포 결과물: `gh-pages` 브랜치
+
+### 1.2 GitHub Actions 워크플로우
+현재 두 개의 워크플로우 파일이 설정되어 있습니다:
+
+#### 1.2.1 deploy.yml
+```yaml
+name: Deploy to GitHub Pages
+# ...
+jobs:
+  build-and-deploy:
+    # ...
+    steps:
+      # ...
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist/public
+          branch: gh-pages
+```
+
+#### 1.2.2 static.yml
+```yaml
+name: Deploy static content to Pages
+# ...
+jobs:
+  deploy:
+    # ...
+    steps:
+      # ...
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+```
+
+두 워크플로우 파일이 동시에 존재하여 충돌이 발생할 수 있습니다. `deploy.yml`은 `JamesIves/github-pages-deploy-action`을 사용하고, `static.yml`은 GitHub의 공식 Pages 액션을 사용합니다.
+
+### 1.3 빌드 설정
+- **빌드 스크립트**: `"build": "vite build"`
+- **출력 디렉토리**: `dist/public`
+- **기본 경로**: `/PalmReading/`
+
+### 1.4 PWA 설정
+- **Manifest 파일**: `/manifest.json`
+- **아이콘**: `/icon-192.png`, `/icon-512.png`
+- **서비스 워커**: `/sw.js`
+- **오프라인 페이지**: `/offline.html`
+
+## 2. 현재 문제점 및 개선 방향
+
+### 2.1 워크플로우 중복 문제
+두 개의 워크플로우 파일(`deploy.yml`과 `static.yml`)이 동시에 존재하여 충돌이 발생할 수 있습니다. 다음과 같은 개선이 필요합니다:
+
+1. **단일 워크플로우 사용**:
+   - 두 워크플로우 중 하나만 사용하도록 설정
+   - 사용하지 않는 워크플로우 파일 삭제 또는 비활성화
+
+2. **경로 일관성 확보**:
+   - `deploy.yml`은 `dist/public`을 배포
+   - `static.yml`은 `./dist`를 배포
+   - 일관된 경로 설정 필요
+
+### 2.2 경로 설정 문제
+현재 `client/index.html`의 리소스 경로가 수정되었지만, 다음과 같은 추가 확인이 필요합니다:
+
+1. **절대 경로 vs 상대 경로**:
+   - 현재: `<link rel="manifest" href="/manifest.json">`
+   - GitHub Pages에서는: `<link rel="manifest" href="/PalmReading/manifest.json">` 형태로 수정 필요
+
+2. **서비스 워커 범위**:
+   - 서비스 워커는 설치된 경로 이하만 제어 가능
+   - `/sw.js`로 설정 시 GitHub Pages 환경에서 문제 발생 가능
+
+### 2.3 빌드 출력 디렉토리 불일치
+- `vite.config.ts`: `outDir: path.resolve(import.meta.dirname, "dist/public")`
+- `static.yml`: `path: './dist'`
+- 이로 인해 정적 파일이 올바르게 배포되지 않을 수 있음
+
+## 3. 권장 개선 사항
+
+### 3.1 워크플로우 통합
+1. **단일 워크플로우 선택**:
+   - 최신 GitHub Pages 액션을 사용하는 `static.yml` 권장
+   - 또는 더 많은 커스터마이징이 필요하면 `deploy.yml` 유지
+
+2. **불필요한 워크플로우 삭제**:
+   ```bash
+   git rm .github/workflows/deploy.yml
+   # 또는
+   git rm .github/workflows/static.yml
+   ```
+
+### 3.2 경로 설정 수정
+1. **index.html 리소스 경로 수정**:
+   ```html
+   <!-- 변경 전 -->
+   <link rel="manifest" href="/manifest.json">
+   <link rel="apple-touch-icon" href="/icon-192.png">
+   
+   <!-- 변경 후 -->
+   <link rel="manifest" href="/PalmReading/manifest.json">
+   <link rel="apple-touch-icon" href="/PalmReading/icon-192.png">
+   ```
+
+2. **서비스 워커 등록 경로 수정**:
+   ```javascript
+   // 변경 전
+   navigator.serviceWorker.register('/sw.js')
+   
+   // 변경 후
+   navigator.serviceWorker.register('/PalmReading/sw.js')
+   ```
+
+### 3.3 빌드 설정 일관성 확보
+1. **vite.config.ts 수정**:
+   ```typescript
+   build: {
+     outDir: path.resolve(import.meta.dirname, "dist"), // dist/public에서 dist로 변경
+     emptyOutDir: true,
+   },
+   ```
+
+2. **또는 static.yml 수정**:
+   ```yaml
+   - name: Upload artifact
+     uses: actions/upload-pages-artifact@v3
+     with:
+       path: './dist/public' # ./dist에서 ./dist/public로 변경
+   ```
+
+### 3.4 package.json 배포 스크립트 수정
+```json
+"scripts": {
+  "predeploy": "npm run build",
+  "deploy": "gh-pages -d dist" // dist/public에서 dist로 변경 (빌드 출력 디렉토리에 맞춤)
+}
+```
+
+## 4. PWA 기능 최적화
+
+### 4.1 오프라인 지원 강화
+1. **캐시 전략 개선**:
+   ```javascript
+   // sw.js
+   const CACHE_NAME = 'palm-reading-v1';
+   const urlsToCache = [
+     '/PalmReading/',
+     '/PalmReading/index.html',
+     '/PalmReading/offline.html',
+     // 중요 CSS, JS, 이미지 파일 추가
+   ];
+   ```
+
+2. **오프라인 경험 향상**:
+   - 핵심 기능을 오프라인에서도 사용 가능하도록 설계
+   - 데이터 저장에 IndexedDB 활용
+
+### 4.2 설치 경험 개선
+1. **설치 배너 커스터마이징**:
+   - `beforeinstallprompt` 이벤트 활용
+   - 사용자 친화적인 설치 UI 제공
+
+2. **앱 아이콘 및 스플래시 스크린 최적화**:
+   - 다양한 해상도의 아이콘 제공
+   - iOS용 스플래시 스크린 이미지 추가
+
+## 5. 성능 최적화
+
+### 5.1 코드 분할 및 지연 로딩
+1. **동적 임포트 활용**:
+   ```javascript
+   const SomeComponent = React.lazy(() => import('./SomeComponent'));
+   ```
+
+2. **라우트 기반 코드 분할**:
+   - 각 페이지별로 별도의 청크로 분할
+
+### 5.2 이미지 최적화
+1. **이미지 포맷 최적화**:
+   - WebP 포맷 사용
+   - 적절한 이미지 크기 및 해상도 제공
+
+2. **지연 로딩 적용**:
+   ```html
+   <img loading="lazy" src="..." alt="...">
+   ```
+
+### 5.3 번들 크기 최적화
+1. **사용하지 않는 코드 제거**:
+   - Tree-shaking 활용
+   - 불필요한 라이브러리 제거
+
+2. **텍스트 압축**:
+   - Gzip 또는 Brotli 압축 활용
+
+## 6. SEO 최적화
+
+### 6.1 메타 태그 최적화
+1. **기본 메타 태그**:
+   ```html
+   <meta name="description" content="AI와 심리학으로 알아보는 나의 진짜 성격 - MBTI, 에겐-테토, 동물상, 손금 테스트">
+   <meta name="keywords" content="MBTI, 에니어그램, 동물상, 손금, 성격 테스트, AI">
+   ```
+
+2. **소셜 미디어 메타 태그**:
+   ```html
+   <meta property="og:title" content="성격 테스트 센터 - AI 성격 분석">
+   <meta property="og:description" content="AI와 심리학으로 알아보는 나의 진짜 성격">
+   <meta property="og:image" content="https://younsanghoon.github.io/PalmReading/social-preview.jpg">
+   ```
+
+### 6.2 사이트맵 생성
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://younsanghoon.github.io/PalmReading/</loc>
+    <lastmod>2023-06-02</lastmod>
+  </url>
+  <!-- 추가 URL -->
+</urlset>
+```
+
+## 7. 다음 단계
+
+### 7.1 단기 작업
+1. **워크플로우 통합 및 수정**
+2. **경로 설정 문제 해결**
+3. **배포된 웹사이트 테스트 및 검증**
+
+### 7.2 중기 작업
+1. **PWA 기능 최적화**
+2. **성능 개선**
+3. **SEO 최적화**
+
+### 7.3 장기 작업
+1. **사용자 피드백 수집 및 분석**
+2. **기능 개선 및 확장**
+3. **커스텀 도메인 적용 검토** 

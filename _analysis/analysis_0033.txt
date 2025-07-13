@@ -1,0 +1,54 @@
+# GitHub Pages 배포 문제 심층 분석
+
+## 문제 요약
+GitHub Pages에 PalmReading 앱을 배포했으나, 이전 프로젝트인 "성격 분석 테스트"가 계속 표시되는 문제가 발생했습니다. 이는 GitHub Pages의 캐싱 문제가 아니라 배포 구성 자체의 문제로 확인되었습니다.
+
+## 원인 분석
+
+### 1. 잘못된 CNAME 설정
+- gh-pages 브랜치에 `CNAME` 파일이 `younsanghoon.github.io/PalmReading`로 설정됨
+- GitHub Pages의 CNAME은 도메인 이름만 포함해야 하며, 경로를 포함할 수 없음
+- 올바른 형식은 `younsanghoon.github.io`이거나, 완전한 커스텀 도메인이어야 함
+
+### 2. 이전 프로젝트 잔여물
+- gh-pages 브랜치에 이전 프로젝트 "성격 분석 테스트"의 파일들이 그대로 남아있음
+- 메타데이터(manifest.json, index.html 등)가 여전히 "성격 분석 테스트" 관련 정보를 포함
+
+### 3. 배포 소스 설정 문제
+- GitHub 저장소 설정에서 배포 소스가 "Deploy from a branch"로 설정되어 있을 가능성
+- GitHub Actions 워크플로우가 있음에도 gh-pages 브랜치에서 직접 배포되고 있음
+
+## GitHub Pages 배포 방식 이해
+
+### 프로젝트 사이트 vs 사용자 사이트
+- 사용자/조직 사이트: `username.github.io` 저장소에서 배포, 루트 URL은 `username.github.io`
+- 프로젝트 사이트: 일반 저장소에서 배포, URL은 `username.github.io/repository-name`
+- PalmReading은 프로젝트 사이트로 배포되어야 함 (younsanghoon.github.io/PalmReading)
+
+### 배포 소스 옵션
+1. **GitHub Actions (권장)**
+   - 커스텀 빌드 및 배포 워크플로우 사용
+   - 더 유연하고 복잡한 빌드 과정 지원
+   - `.github/workflows/static.yml` 파일로 이미 구성됨
+
+2. **Deploy from a branch**
+   - 지정된 브랜치(보통 gh-pages)에서 직접 배포
+   - 단순한 정적 사이트에 적합
+   - 현재 이 방식이 사용 중인 것으로 추정됨
+
+## 해결 방안 상세
+
+### 1. GitHub Actions 배포로 전환
+- GitHub 저장소 설정에서 Pages > Build and deployment > Source를 "GitHub Actions"로 변경
+- 이미 구성된 `.github/workflows/static.yml` 워크플로우 활용
+
+### 2. CNAME 파일 처리
+- 프로젝트 사이트로 사용 시 CNAME 파일 삭제 권장
+- 커스텀 도메인 사용 시 도메인 이름만 포함하도록 수정
+
+### 3. 메타데이터 업데이트
+- manifest.json, index.html 등의 파일에서 앱 이름과 설명을 "손금 테스트"로 일관되게 변경
+- 이미 pages-fix 브랜치에서 이러한 변경이 적용됨
+
+## 결론
+GitHub Pages 배포 문제는 단순한 캐싱이나 빌드 문제가 아닌, 배포 구성과 이전 프로젝트의 잔여물로 인한 것입니다. GitHub Actions를 통한 배포로 전환하고 메타데이터를 일관되게 업데이트하면 문제가 해결될 것으로 예상됩니다. 

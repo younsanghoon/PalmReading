@@ -1,0 +1,207 @@
+# 프로젝트 분석: 구글 애드센스 광고 통합 문제
+
+## 1. 광고 통합 현황
+
+### 1.1 Google AdSense 설정
+- **스크립트 통합**: client/index.html 파일의 `<head>` 섹션에 AdSense 스크립트 추가됨
+  ```html
+  <script async src="https://pagead.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6706508307630636" crossorigin="anonymous"></script>
+  ```
+- **계정 ID**: ca-pub-6706508307630636
+- **광고 슬롯**: 더미 ID "1234567890"가 사용되고 있었음 (실제 슬롯 ID로 교체 필요)
+
+### 1.2 AdSpace 컴포넌트 구현
+- **경로**: client/src/components/ui/ad-space.tsx
+- **지원 광고 유형**:
+  - banner (728x90)
+  - rectangle (320x250)
+  - skyscraper (160x600)
+  - mobile (320x50)
+  - affiliate (어필리에이트 광고)
+- **광고 로드 로직**:
+  ```typescript
+  useEffect(() => {
+    if (type !== 'affiliate' && adRef.current && (window as any).adsbygoogle) {
+      try {
+        (window as any).adsbygoogle = (window as any).adsbygoogle || [];
+        (window as any).adsbygoogle.push({});
+      } catch (error) {
+        console.error('AdSense error:', error);
+      }
+    }
+  }, [type]);
+  ```
+
+### 1.3 광고 배치
+- **홈페이지**: 배너, 스카이스크래퍼, 모바일, 직사각형 광고 배치
+- **테스트 페이지**: 각 테스트 결과 페이지에 직사각형 광고 배치
+- **정보 페이지**: 개인정보 처리방침, 이용약관 페이지에 배너 및 직사각형 광고 배치
+
+## 2. 문제점 분석
+
+### 2.1 광고가 표시되지 않는 원인
+1. **잘못된 광고 슬롯 ID**: 
+   - 모든 광고 유형에 동일한 더미 ID "1234567890" 사용
+   - Google AdSense 계정에 등록된 실제 슬롯 ID와 일치하지 않음
+
+2. **서비스 워커 간섭**:
+   - 서비스 워커(sw.js)가 AdSense 관련 요청을 캐싱하거나 차단할 가능성
+   - AdSense 요청은 캐싱 없이 네트워크로 직접 전달되어야 함
+
+3. **스크립트 로드 문제**:
+   - AdSense 스크립트가 제대로 로드되지 않거나 초기화되지 않을 가능성
+   - 로드 상태 확인 로직 부재
+
+4. **광고 차단기 영향**:
+   - 사용자의 광고 차단 확장 프로그램에 의해 차단될 가능성
+   - 개발자 환경에서도 광고 차단기가 활성화되어 있을 수 있음
+
+### 2.2 코드 문제점
+1. **AdSpace 컴포넌트**:
+   - 광고 로드 실패 시 시각적 피드백 부재
+   - 광고 타입별 다른 슬롯 ID를 사용하지 않음
+   - 디버깅 정보 부족
+
+2. **서비스 워커**:
+   - AdSense 요청에 대한 특별 처리 없음
+   - 모든 요청을 동일하게 처리하여 광고 로드 방해 가능성
+
+3. **index.html**:
+   - AdSense 스크립트 로드 확인 로직 부재
+   - 로드 실패 시 대체 처리 없음
+
+## 3. 해결 방안
+
+### 3.1 단기 해결책
+1. **광고 슬롯 ID 수정**:
+   - 광고 유형별 올바른 슬롯 ID 적용
+   - 배너: 7259870977
+   - 직사각형: 6737604370
+   - 스카이스크래퍼: 5414337776
+   - 모바일: 3991071178
+
+2. **서비스 워커 수정**:
+   - AdSense 관련 URL 패턴 정의
+   - 해당 요청은 캐싱하지 않고 네트워크로 직접 전달
+
+3. **디버깅 코드 추가**:
+   - AdSense 스크립트 로드 확인 로직 추가
+   - 광고 로드 과정 로깅 추가
+   - 광고 영역에 시각적 테두리 추가
+
+### 3.2 장기 개선 방안
+1. **광고 로드 상태 관리**:
+   - 로드 중/성공/실패 상태 표시
+   - 실패 시 대체 콘텐츠 또는 재시도 메커니즘
+
+2. **광고 차단 감지**:
+   - 광고 차단기 사용 감지 로직 구현
+   - 사용자에게 광고 차단 해제 요청 메시지 표시
+
+3. **광고 최적화**:
+   - 페이지 성능에 미치는 영향 최소화
+   - 지연 로딩 적용
+   - 광고 표시 타이밍 최적화
+
+4. **대체 광고 전략**:
+   - AdSense 외 다른 광고 네트워크 통합 고려
+   - 어필리에이트 광고 비중 확대
+
+## 4. 구현 상세
+
+### 4.1 AdSpace 컴포넌트 개선
+```typescript
+// 광고 타입에 따른 슬롯 ID 반환
+const getAdSlot = () => {
+  switch (type) {
+    case 'banner':
+      return '7259870977';
+    case 'rectangle':
+      return '6737604370';
+    case 'skyscraper':
+      return '5414337776';
+    case 'mobile':
+      return '3991071178';
+    default:
+      return '6737604370'; // 기본값은 rectangle
+  }
+};
+
+// 광고 로드 로직에 디버깅 코드 추가
+useEffect(() => {
+  console.log(`[AdSpace] Attempting to load ad type: ${type}`);
+  console.log(`[AdSpace] adsbygoogle available:`, !!(window as any).adsbygoogle);
+  
+  if (type !== 'affiliate' && adRef.current && (window as any).adsbygoogle) {
+    try {
+      console.log(`[AdSpace] Pushing ad to adsbygoogle`);
+      (window as any).adsbygoogle = (window as any).adsbygoogle || [];
+      (window as any).adsbygoogle.push({});
+      console.log(`[AdSpace] Ad push completed`);
+    } catch (error) {
+      console.error('AdSense error:', error);
+    }
+  } else {
+    console.log(`[AdSpace] Conditions not met for ad loading:`, {
+      isAffiliate: type === 'affiliate',
+      hasAdRef: !!adRef.current,
+      hasAdsbygoogle: !!(window as any).adsbygoogle
+    });
+  }
+}, [type]);
+```
+
+### 4.2 서비스 워커 수정
+```javascript
+// AdSense 관련 URL 패턴
+const adsenseUrls = [
+  'pagead2.googlesyndication.com',
+  'googleads.g.doubleclick.net',
+  'tpc.googlesyndication.com',
+  'www.googletagservices.com'
+];
+
+self.addEventListener('fetch', function(event) {
+  // AdSense 관련 요청은 네트워크로 직접 전달
+  const url = new URL(event.request.url);
+  if (adsenseUrls.some(adsUrl => url.hostname.includes(adsUrl))) {
+    console.log('[SW] Bypassing AdSense request:', url.hostname);
+    return;
+  }
+
+  // 기존 캐싱 로직...
+});
+```
+
+### 4.3 index.html 개선
+```javascript
+// AdSense 로딩 확인
+window.addEventListener('load', function() {
+  console.log('[AdSense Debug] Window loaded');
+  setTimeout(function() {
+    console.log('[AdSense Debug] AdSense script loaded:', typeof window.adsbygoogle !== 'undefined');
+    if (typeof window.adsbygoogle !== 'undefined') {
+      console.log('[AdSense Debug] AdSense object:', window.adsbygoogle);
+    } else {
+      console.warn('[AdSense Debug] AdSense not loaded after 2 seconds');
+    }
+  }, 2000);
+});
+```
+
+## 5. 결론 및 권장사항
+
+### 5.1 즉시 적용할 변경사항
+- 광고 슬롯 ID 수정 (더미 ID → 실제 ID)
+- 서비스 워커 수정으로 AdSense 요청 우회 처리
+- 디버깅 로그 추가로 문제 원인 파악
+
+### 5.2 추가 확인사항
+- Google AdSense 계정 상태 확인
+- 광고 승인 상태 확인
+- 도메인 연결 및 사이트 확인 상태 점검
+
+### 5.3 장기 개선 계획
+- 광고 로드 실패 시 대체 콘텐츠 표시
+- 광고 차단 감지 및 사용자 안내 메시지
+- 광고 성능 및 수익 분석 도구 통합 

@@ -1,0 +1,105 @@
+# 홈 페이지 설정 및 내용 변경 분석
+
+## 문제 요약
+GitHub Pages에 배포된 PalmReading 앱이 단순한 랜딩 페이지만 표시되고, 실제 앱 기능으로 연결되지 않는 문제가 있었습니다. 사용자가 웹사이트에 접속했을 때 자동으로 메인 기능 페이지로 이동하거나, 홈 페이지 자체에 앱의 주요 기능을 표시해야 했습니다.
+
+## 원인 분석
+
+### 1. 라우팅 구성 문제
+- 기존 App.tsx는 단순한 정적 페이지만 렌더링하고 있었음
+- 라우터 설정이 되어 있지 않아 다른 페이지로 이동할 수 없었음
+- wouter 라이브러리는 프로젝트에 설치되어 있었지만 App.tsx에서 활용되지 않음
+
+### 2. 내용 불일치
+- 앱의 제목과 설명이 "성격 분석 테스트"로 되어 있어 실제 앱의 목적인 "손금 테스트"와 일치하지 않음
+- 다국어 지원 코드에서도 "성격 분석 테스트" 관련 텍스트가 사용됨
+- 푸터 및 저작권 정보도 이전 프로젝트 정보를 포함
+
+## 해결 과정
+
+### 1. 라우터 설정 구현
+```tsx
+import React, { useEffect } from "react";
+import { Route, Switch, useLocation } from "wouter";
+import Home from "./pages/home";
+import AnimalTest from "./pages/animal-test";
+import MbtiTest from "./pages/mbti-test";
+import EnneagramTest from "./pages/enneagram-test";
+import PalmTest from "./pages/palm-test";
+import PrivacyPolicy from "./pages/privacy-policy";
+import TermsOfService from "./pages/terms-of-service";
+import Contact from "./pages/contact";
+import NotFound from "./pages/not-found";
+
+function App() {
+  const [location, setLocation] = useLocation();
+
+  useEffect(() => {
+    // 현재 경로 로깅
+    console.log("Current location:", location);
+  }, [location]);
+
+  return (
+    <Switch>
+      <Route path="/" component={Home} />
+      <Route path="/PalmReading" component={Home} />
+      <Route path="/PalmReading/" component={Home} />
+      <Route path="/animal-test" component={AnimalTest} />
+      <Route path="/mbti-test" component={MbtiTest} />
+      <Route path="/enneagram-test" component={EnneagramTest} />
+      <Route path="/palm-test" component={PalmTest} />
+      <Route path="/privacy-policy" component={PrivacyPolicy} />
+      <Route path="/terms-of-service" component={TermsOfService} />
+      <Route path="/contact" component={Contact} />
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
+
+export default App;
+```
+
+이 변경으로 다음과 같은 개선이 이루어졌습니다:
+- 루트 경로('/', '/PalmReading', '/PalmReading/')에 Home 컴포넌트 매핑
+- 다양한 테스트 페이지 및 기타 페이지에 대한 라우팅 설정
+- 404 페이지(NotFound) 설정
+
+### 2. 홈 페이지 내용 변경
+홈 페이지의 내용을 "성격 분석 테스트"에서 "손금 테스트"로 변경했습니다. 이 과정에서 다국어 지원 관련 타입 에러가 발생하여 코드 구조를 개선했습니다.
+
+```tsx
+// 손금 테스트 관련 텍스트
+const pageTitle = "손금 테스트";
+const pageDescription = "AI로 알아보는 나의 운명. 손금으로 보는 미래, 성격, 재물운, 건강운, 사랑운을 확인해보세요.";
+const footerTitle = "손금 테스트";
+const footerDescription = "AI 기반 손금 분석으로 나의 운명을 확인하세요";
+const copyright = "© 2024 손금 테스트. 모든 권리 보유.";
+```
+
+이 방식은 다음과 같은 이점이 있습니다:
+- 타입 에러 해결: `t.language` 속성 접근으로 인한 타입 에러 방지
+- 코드 가독성 향상: 하드코딩된 텍스트를 상수로 분리하여 관리 용이
+- 일관성 유지: 모든 관련 텍스트를 한 곳에서 관리
+
+## 기술적 세부사항
+
+### 1. wouter 라우터 사용
+wouter는 React 애플리케이션을 위한 경량 라우터 라이브러리로, 다음과 같은 특징이 있습니다:
+- 작은 번들 크기 (약 1.5KB)
+- 간단한 API (React Router와 유사하지만 더 간결함)
+- 훅 기반 API 제공 (`useLocation`, `useRoute` 등)
+
+### 2. 다국어 지원 구조
+프로젝트는 `i18n.ts`를 통해 다국어 지원을 구현하고 있으며, `useLanguage` 훅을 통해 현재 언어에 맞는 번역을 제공합니다. 그러나 `t.language` 속성에 대한 타입 정의가 누락되어 있어 타입 에러가 발생했습니다.
+
+### 3. 컴포넌트 구조
+- App.tsx: 라우팅 설정 및 전체 앱 구조 정의
+- pages/home.tsx: 메인 홈페이지 구현
+- components/ui/: UI 컴포넌트 모음
+- components/personality-tests/: 각종 테스트 관련 컴포넌트
+
+## 결론 및 권장사항
+1. **다국어 지원 개선**: `i18n.ts`의 `Translations` 인터페이스에 `language` 속성을 추가하여 타입 에러 해결
+2. **라우팅 테스트**: 모든 경로가 올바르게 작동하는지 종합적인 테스트 필요
+3. **SEO 최적화**: 메타 태그 및 타이틀 업데이트를 통한 SEO 개선
+4. **성능 최적화**: 코드 스플리팅을 통한 초기 로딩 시간 개선 고려 
